@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bce5f31e4799894cb6c1253dde55d53, type: 3}
+  m_Name: Mp5
+  m_EditorClassIdentifier: 
+  id: 38
+  Equipado: 0
+  tipoDeMunicao: 2
+  tipoDeItem: 2
+  iconHorizontal: {fileID: 1062803655, guid: d5cfdc1b94af9b14e96930911f3a7307, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 0
+  isOnlyItem: 0
+  label: MP5
+  description: Submetralhadora 9mm
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 3
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  dropChance: 50
+  actionUseList: []
+  actionEquipList:
+  - {fileID: 11400000, guid: 3403f8a5c6072ad48b5ccfb5ccc4dca6, type: 2}
+  tipoEquip: 3
+  modoDeTiro: 0
+  podeTrocarModoTiro: 1
+  sniper: 0
+  tipoDeRecarga: 0
+  fireRateSingle: 8.3
+  fireRateAutomatic: 15
+  bulletRange: 70
+  danoMunicao: 35
+  municaoMaxima: 30
+  municaoParaRecarregar: 0
+  tempoCarregarInicio: 0
+  tempoCarregarLoop: 0
+  tempoCarregarFim: 0

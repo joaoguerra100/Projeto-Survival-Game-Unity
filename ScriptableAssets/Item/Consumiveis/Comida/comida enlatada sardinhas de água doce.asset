@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5928a2c88cb5ac4d8070e0993447a63, type: 3}
+  m_Name: "comida enlatada sardinhas de \xE1gua doce"
+  m_EditorClassIdentifier: 
+  id: 25
+  Equipado: 0
+  tipoDeMunicao: 0
+  tipoDeItem: 0
+  iconHorizontal: {fileID: 2053530090, guid: cd0a3f6f7a6d99740aeabae2e6537846, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 1
+  isOnlyItem: 0
+  label: "comida enlatada sardinhas de \xE1gua doce"
+  description: "Uma comida enlatada sardinhas de \xE1gua doce, que regenera fome"
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 0.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  actionUseList:
+  - {fileID: 11400000, guid: 685ddcbd61b35094ea761058d7eaa9f9, type: 2}

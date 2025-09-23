@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5928a2c88cb5ac4d8070e0993447a63, type: 3}
+  m_Name: Manteiga de amendoim cremosa
+  m_EditorClassIdentifier: 
+  id: 20
+  Equipado: 0
+  tipoDeMunicao: 0
+  tipoDeItem: 0
+  iconHorizontal: {fileID: 1538408078, guid: 9201a38832eb7e64185b9814ce1e9215, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 1
+  isOnlyItem: 0
+  label: Manteiga de amendoim cremosa
+  description: Uma Manteiga de amendoim cremosa, que regenera fome
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 0.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  actionUseList:
+  - {fileID: 11400000, guid: f8ef299f18689dd48ab4d64ed68ad42b, type: 2}

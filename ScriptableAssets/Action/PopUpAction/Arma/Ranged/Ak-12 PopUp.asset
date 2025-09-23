@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ce3b0b9881008049b24f81371728c78, type: 3}
+  m_Name: Ak-12 PopUp
+  m_EditorClassIdentifier: 
+  delayToStart: 0
+  description: Ak-12 foi coletada
+  icon: {fileID: 1507115425, guid: 7b0b5a789caf2c74a82deb6e8d042fc3, type: 3}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
+  backGroundColor: {r: 0.09033465, g: 0.09474628, b: 0.13207549, a: 1}
+  timeToClosePopup: 4

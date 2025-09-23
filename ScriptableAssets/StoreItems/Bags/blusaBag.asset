@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a157765a9e81e594c9825244b10919c3, type: 3}
+  m_Name: blusaBag
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: 560e57284defe46d083b92e27c07582d, type: 3}
+  title: blusa Bag
+  maxColum: 4
+  maxRow: 2
+  currentSlotUse: 0
+  weigthLimited: 50
+  currentWeigthUse: 0
+  autoOrganze: 0
+  weaponList: []
+  inventoryItemsList: []
+  maxShortCutSlot: 1
+  rulerList:
+  - {fileID: 11400000, guid: 6a18b5e6f708f6f418a452708cfb6ffe, type: 2}

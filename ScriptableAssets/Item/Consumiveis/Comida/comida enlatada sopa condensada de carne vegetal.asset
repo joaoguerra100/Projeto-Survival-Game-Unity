@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5928a2c88cb5ac4d8070e0993447a63, type: 3}
+  m_Name: comida enlatada sopa condensada de carne vegetal
+  m_EditorClassIdentifier: 
+  id: 24
+  Equipado: 0
+  tipoDeMunicao: 0
+  tipoDeItem: 0
+  iconHorizontal: {fileID: 920329033, guid: 6ec0d489cd439dc44a3e68fe5a852a69, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 1
+  isOnlyItem: 0
+  label: comida enlatada sopa condensada de carne vegetal
+  description: Uma comida enlatada sopa condensada de carne vegetal, que regenera
+    fome
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 0.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  actionUseList:
+  - {fileID: 11400000, guid: 842e36211891daf4aaa5c38b05c3655b, type: 2}

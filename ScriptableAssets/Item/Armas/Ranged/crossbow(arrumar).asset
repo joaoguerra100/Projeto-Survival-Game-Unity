@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bce5f31e4799894cb6c1253dde55d53, type: 3}
+  m_Name: crossbow(arrumar)
+  m_EditorClassIdentifier: 
+  id: 48
+  Equipado: 0
+  tipoDeMunicao: 0
+  tipoDeItem: 2
+  iconHorizontal: {fileID: 0}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 0
+  isOnlyItem: 0
+  label: Crossbow
+  description: Crossbow que usa virotes
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 2.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  dropChance: 50
+  actionUseList: []
+  actionEquipList:
+  - {fileID: 11400000, guid: 8ba330e2e50973043a4ac63f3937e7c3, type: 2}
+  tipoEquip: 14
+  modoDeTiro: 0
+  podeTrocarModoTiro: 0
+  sniper: 0
+  tipoDeRecarga: 0
+  fireRateSingle: 0.5
+  fireRateAutomatic: 0
+  bulletRange: 50
+  danoMunicao: 30
+  municaoMaxima: 1
+  municaoParaRecarregar: 0
+  tempoCarregarInicio: 0
+  tempoCarregarLoop: 0
+  tempoCarregarFim: 0

@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bce5f31e4799894cb6c1253dde55d53, type: 3}
+  m_Name: Minibea_Pm_9
+  m_EditorClassIdentifier: 
+  id: 49
+  Equipado: 0
+  tipoDeMunicao: 3
+  tipoDeItem: 2
+  iconHorizontal: {fileID: -375686104, guid: 87980d2978a27e247888b11cfbf9eecd, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 0
+  isOnlyItem: 0
+  label: Minibea_Pm_9
+  description: Minibea_Pm_9 calibre .45
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 2.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  dropChance: 50
+  actionUseList: []
+  actionEquipList:
+  - {fileID: 11400000, guid: f3be43ee72140d0479185542aa0b05ce, type: 2}
+  tipoEquip: 12
+  modoDeTiro: 0
+  podeTrocarModoTiro: 1
+  sniper: 0
+  tipoDeRecarga: 0
+  fireRateSingle: 9.1
+  fireRateAutomatic: 18
+  bulletRange: 70
+  danoMunicao: 45
+  municaoMaxima: 30
+  municaoParaRecarregar: 0
+  tempoCarregarInicio: 0
+  tempoCarregarLoop: 0
+  tempoCarregarFim: 0

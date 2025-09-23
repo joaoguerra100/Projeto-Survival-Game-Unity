@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bce5f31e4799894cb6c1253dde55d53, type: 3}
+  m_Name: Scar_L
+  m_EditorClassIdentifier: 
+  id: 41
+  Equipado: 0
+  tipoDeMunicao: 6
+  tipoDeItem: 2
+  iconHorizontal: {fileID: 1557900221, guid: bcd5144817946c945833e0709541603b, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 0
+  isOnlyItem: 0
+  label: Scar_L
+  description: Metralhadora 5x56
+  currentNumber: 0
+  limitedNumber: 1
+  weigthPerItem: 5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  dropChance: 50
+  actionUseList: []
+  actionEquipList:
+  - {fileID: 11400000, guid: 68c9be5cadfbdf24183c2e6c876d8a0e, type: 2}
+  tipoEquip: 6
+  modoDeTiro: 0
+  podeTrocarModoTiro: 1
+  sniper: 0
+  tipoDeRecarga: 0
+  fireRateSingle: 7.5
+  fireRateAutomatic: 10
+  bulletRange: 150
+  danoMunicao: 55
+  municaoMaxima: 30
+  municaoParaRecarregar: 4
+  tempoCarregarInicio: 0
+  tempoCarregarLoop: 0
+  tempoCarregarFim: 0

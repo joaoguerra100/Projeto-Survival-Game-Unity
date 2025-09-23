@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bce5f31e4799894cb6c1253dde55d53, type: 3}
+  m_Name: AWM
+  m_EditorClassIdentifier: 
+  id: 45
+  Equipado: 0
+  tipoDeMunicao: 8
+  tipoDeItem: 2
+  iconHorizontal: {fileID: 1254403469, guid: 8a00c20fbcda86f4fa47677ad2b8e47d, type: 3}
+  iconVertical: {fileID: 1254403469, guid: 8a00c20fbcda86f4fa47677ad2b8e47d, type: 3}
+  isDroppable: 1
+  removeWhenNumberIsZero: 0
+  isOnlyItem: 0
+  label: AWM
+  description: Sniper AWM .300
+  currentNumber: 0
+  limitedNumber: 1
+  weigthPerItem: 6.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  dropChance: 50
+  actionUseList: []
+  actionEquipList:
+  - {fileID: 11400000, guid: a102f26371eae414db53560188317b3a, type: 2}
+  tipoEquip: 10
+  modoDeTiro: 0
+  podeTrocarModoTiro: 0
+  sniper: 1
+  tipoDeRecarga: 0
+  fireRateSingle: 1
+  fireRateAutomatic: 0
+  bulletRange: 300
+  danoMunicao: 80
+  municaoMaxima: 5
+  municaoParaRecarregar: 0
+  tempoCarregarInicio: 0
+  tempoCarregarLoop: 0
+  tempoCarregarFim: 0

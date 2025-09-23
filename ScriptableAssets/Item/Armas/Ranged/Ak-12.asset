@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bce5f31e4799894cb6c1253dde55d53, type: 3}
+  m_Name: Ak-12
+  m_EditorClassIdentifier: 
+  id: 40
+  Equipado: 0
+  tipoDeMunicao: 5
+  tipoDeItem: 2
+  iconHorizontal: {fileID: 1507115425, guid: 7b0b5a789caf2c74a82deb6e8d042fc3, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 0
+  isOnlyItem: 0
+  label: Ak 12
+  description: Metralhadora 5x45
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 5
+  totalWeigthPerItem: 0
+  itemSize: {x: 2, y: 4}
+  dropChance: 50
+  actionUseList: []
+  actionEquipList:
+  - {fileID: 11400000, guid: dc903e26cf5dd1441a45725f6706be5f, type: 2}
+  tipoEquip: 5
+  modoDeTiro: 0
+  podeTrocarModoTiro: 1
+  sniper: 0
+  tipoDeRecarga: 0
+  fireRateSingle: 7.5
+  fireRateAutomatic: 10
+  bulletRange: 150
+  danoMunicao: 50
+  municaoMaxima: 30
+  municaoParaRecarregar: 0
+  tempoCarregarInicio: 0
+  tempoCarregarLoop: 0
+  tempoCarregarFim: 0

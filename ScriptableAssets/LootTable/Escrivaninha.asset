@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72712fa2437006a448f397bb10331edb, type: 3}
+  m_Name: Escrivaninha
+  m_EditorClassIdentifier: 
+  nomeContainer: Escrivaninha
+  possiveisItens:
+  - baseItemData: {fileID: 11400000, guid: ac35fe3f858aee744868909b313dc1d5, type: 2}
+    weaponItemScriptable: {fileID: 11400000, guid: ac35fe3f858aee744868909b313dc1d5, type: 2}
+    bagOwner: {fileID: 11400000, guid: bc7a814883762e949b3daee277e662c3, type: 2}
+    instanceID: 
+    isRotated: 0
+    quantidade: 1
+  - baseItemData: {fileID: 11400000, guid: 85d8ec53cf117a441b6d891759e12ebb, type: 2}
+    weaponItemScriptable: {fileID: 11400000, guid: 85d8ec53cf117a441b6d891759e12ebb, type: 2}
+    bagOwner: {fileID: 11400000, guid: c1cc90ae5b18d124084205c6c3e6ac19, type: 2}
+    instanceID: 
+    isRotated: 1
+    quantidade: 1
+  - baseItemData: {fileID: 11400000, guid: 7740f8675bfa94c48a2631a3313b3a99, type: 2}
+    weaponItemScriptable: {fileID: 11400000, guid: 7740f8675bfa94c48a2631a3313b3a99, type: 2}
+    bagOwner: {fileID: 11400000, guid: e583b48b02cf950459de6385bf62802e, type: 2}
+    instanceID: 
+    isRotated: 0
+    quantidade: 1
+  - baseItemData: {fileID: 11400000, guid: 3fac666dabb8e5c40bab580ccf1a3234, type: 2}
+    weaponItemScriptable: {fileID: 0}
+    bagOwner: {fileID: 11400000, guid: bc7a814883762e949b3daee277e662c3, type: 2}
+    instanceID: 
+    isRotated: 0
+    quantidade: 1

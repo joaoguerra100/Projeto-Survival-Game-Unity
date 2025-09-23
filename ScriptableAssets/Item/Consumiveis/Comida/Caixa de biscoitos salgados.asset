@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5928a2c88cb5ac4d8070e0993447a63, type: 3}
+  m_Name: Caixa de biscoitos salgados
+  m_EditorClassIdentifier: 
+  id: 37
+  Equipado: 0
+  tipoDeMunicao: 0
+  tipoDeItem: 0
+  iconHorizontal: {fileID: 221585988, guid: 698697b71585ad14ead3c467874f1746, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 1
+  isOnlyItem: 0
+  label: Caixa de biscoitos salgados
+  description: Uma Caixa de biscoitos salgados, que regenera fome
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 0.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  actionUseList:
+  - {fileID: 11400000, guid: 4321ad200033b124db9b83e82f7b93a1, type: 2}

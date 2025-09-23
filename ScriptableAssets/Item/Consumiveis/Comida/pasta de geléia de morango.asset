@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5928a2c88cb5ac4d8070e0993447a63, type: 3}
+  m_Name: "pasta de gel\xE9ia de morango"
+  m_EditorClassIdentifier: 
+  id: 18
+  Equipado: 0
+  tipoDeMunicao: 0
+  tipoDeItem: 0
+  iconHorizontal: {fileID: 324011129, guid: 04393a4ce5d0bd144885f0b06b1b4cb4, type: 3}
+  iconVertical: {fileID: 0}
+  isDroppable: 1
+  removeWhenNumberIsZero: 1
+  isOnlyItem: 0
+  label: "pasta de gel\xE9ia de morango"
+  description: "Uma pasta de gel\xE9ia de morango, que regenera fome"
+  currentNumber: 0
+  limitedNumber: 999
+  weigthPerItem: 0.5
+  totalWeigthPerItem: 0
+  itemSize: {x: 1, y: 1}
+  actionUseList:
+  - {fileID: 11400000, guid: 887871d8a28eee4439e7d798a23e1471, type: 2}
