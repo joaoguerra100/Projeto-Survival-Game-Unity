@@ -314,7 +314,7 @@ public class Zumbi : MonoBehaviour
         float sorteio = Random.Range(0, 100);
         if (sorteio <= chancePorcentual)
         {
-            Player.instance.sangrando = true;
+            Player.instance.stats.AplicarSangramento(true);
         }
     }
     void ChanceDeMordida()

@@ -12,6 +12,10 @@ public class MeleeWeaponItemScriptable : GenericItemScriptable
     public float custoEstaminaAtackFraco;
     public float custoEstaminaAtackForte;
 
+    [Header("Atributos de Combate")]
+    [Tooltip("Valor base 1. Valores > 1 deixam o ataque mais lento. Valores < 1 deixam mais rápido.")]
+    public float pesoArma = 1f;
+
     public override void ActionEquipAndUnequipListDispatch()
     {
         actionManagerEvt = new ActionManagerEvent();

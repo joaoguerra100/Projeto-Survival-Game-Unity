@@ -67,22 +67,24 @@ public class ArmaMelee : MonoBehaviour
         // Ataque Forte
         if (holdTime >= holdThreshold)
         {
-            if (Player.instance.estaminaAtual >= weaponData.custoEstaminaAtackForte)
+            if (Player.instance.stats.estaminaAtual >= weaponData.custoEstaminaAtackForte)
             {
                 isAttacking = true;
+                PlayerBracos.instance.PrepararVelocidadeDeAtaque();
                 PlayerBracos.instance.anim.SetTrigger("AtaqueForte");
-                Player.instance.anim.SetTrigger("AtaqueForte");
+                //Player.instance.anim.SetTrigger("AtaqueForte");
                 Player.instance.UsarStamina(weaponData.custoEstaminaAtackForte);
             }
         }
         // Ataque Fraco
         else
         {
-            if (podeBater && Player.instance.estaminaAtual >= weaponData.custoEstaminaAtackFraco)
+            if (podeBater && Player.instance.stats.estaminaAtual >= weaponData.custoEstaminaAtackFraco)
             {
                 isAttacking = true;
+                PlayerBracos.instance.PrepararVelocidadeDeAtaque();
                 PlayerBracos.instance.anim.SetTrigger("AtaqueFraco");
-                Player.instance.anim.SetTrigger("AtaqueFraco");
+                //Player.instance.anim.SetTrigger("AtaqueFraco");
                 Player.instance.UsarStamina(weaponData.custoEstaminaAtackFraco);
             }
         }
@@ -124,6 +126,9 @@ public class ArmaMelee : MonoBehaviour
     {
         isAttacking = false;
         holdTime = 0f;
+
+        //Restaura a valocidade do animator no final do atack
+        PlayerBracos.instance.ResetarVelocidadeAnimacao();
     }
     #endregion
 

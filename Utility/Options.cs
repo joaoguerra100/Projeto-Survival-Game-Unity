@@ -29,14 +29,6 @@ public enum ItemType
     MUNICAO = 5
 }
 
-public enum SliderType
-{
-    VIDA = 0,
-    ESTAMINA = 1,
-    FOME = 2,
-    SEDE = 3
-}
-
 public enum RoupaEquip
 {
     NONE = 0,

@@ -35,26 +35,18 @@ public class GameController : MonoBehaviour
     void Awake()
     {
         instance = this;
-        defaultMoveSpeed = playerSpt.velocidadeJogador;
-        defaultJump = playerSpt.alturaDoPulo;
+        
     }
 
     void Start()
     {
         DontDestroyOnLoad(this);
-
-        
-
+        defaultMoveSpeed = playerSpt.stats.velAndar;
+        defaultJump = playerSpt.alturaDoPulo;
     }
 
     void Update()
     {
-        //SLIDERS:
-        Hud.instance.ChangeSlider(SliderType.VIDA, Player.instance.vidaAtual, Player.instance.vidaMaxima);
-        Hud.instance.ChangeSlider(SliderType.ESTAMINA, Player.instance.estaminaAtual, Player.instance.estaminaMax);
-        Hud.instance.ChangeSlider(SliderType.FOME, Player.instance.fomeAtual, Player.instance.fomeMaxima);
-        Hud.instance.ChangeSlider(SliderType.SEDE, Player.instance.sedeAtual, Player.instance.sedeMaxima);
-        
         bool estaSeMovendo = Player.instance.movimentosJogador.magnitude > 0.1f; // exemplo para esforço físico
         DiminuiFomeSede(estaSeMovendo);
     }
@@ -64,13 +56,13 @@ public class GameController : MonoBehaviour
     public void ChangeRate(float rate) //MUDA A VELOCIDADE DO PERSONAGEM A PARTIRAR DA TAXA RATE
     {
         rateReduceMovements = rate;
-        playerSpt.velocidadeJogador = defaultMoveSpeed * rateReduceMovements;
+        playerSpt.stats.velAndar = defaultMoveSpeed * rateReduceMovements;
         playerSpt.alturaDoPulo = defaultJump * rateReduceMovements;
     }
 
     public void ResetMoveSpeed()
     {
-        playerSpt.velocidadeJogador = defaultMoveSpeed;
+        playerSpt.stats.velAndar = defaultMoveSpeed;
         playerSpt.alturaDoPulo = defaultJump;
     }
 
@@ -82,20 +74,20 @@ public class GameController : MonoBehaviour
         float perdaSede = (estaSeMovendo ? 0.1f : 0.05f);
 
         // Reduz Fome e Sede
-        Player.instance.fomeAtual -= perdaFome * Time.deltaTime;
-        Player.instance.fomeAtual = Mathf.Clamp(Player.instance.fomeAtual, 0, Player.instance.fomeMaxima);
+        Player.instance.stats.fomeAtual -= perdaFome * Time.deltaTime;
+        Player.instance.stats.fomeAtual = Mathf.Clamp(Player.instance.stats.fomeAtual, 0, Player.instance.stats.fomeMaxima);
 
-        Player.instance.sedeAtual -= perdaSede * Time.deltaTime;
-        Player.instance.sedeAtual = Mathf.Clamp(Player.instance.sedeAtual, 0, Player.instance.sedeMaxima);
+        Player.instance.stats.sedeAtual -= perdaSede * Time.deltaTime;
+        Player.instance.stats.sedeAtual = Mathf.Clamp(Player.instance.stats.sedeAtual, 0, Player.instance.stats.sedeMaxima);
 
         // --- Penalidades por Fome ---
-        if (Player.instance.fomeAtual < 10f)
+        if (Player.instance.stats.fomeAtual < 10f)
         {
             // Fome crítica: perde vida
-            Player.instance.vidaAtual -= 0.7f * Time.deltaTime;
+            Player.instance.stats.vidaAtual -= 0.7f * Time.deltaTime;
             //Debug.Log("Fome crítica - perdendo vida");
         }
-        else if (Player.instance.fomeAtual < 30f)
+        else if (Player.instance.stats.fomeAtual < 30f)
         {
             // Fome moderada: regen reduzida
             Player.instance.RecuperarStamina(3f);
@@ -103,13 +95,13 @@ public class GameController : MonoBehaviour
         }
 
         // --- Penalidades por Sede ---
-        if (Player.instance.sedeAtual < 10f)
+        if (Player.instance.stats.sedeAtual < 10f)
         {
             // Sede crítica: perde vida
-            Player.instance.vidaAtual -= 0.7f * Time.deltaTime;
+            Player.instance.stats.vidaAtual -= 0.7f * Time.deltaTime;
             //Debug.Log("Sede crítica - perdendo vida");
         }
-        else if (Player.instance.sedeAtual < 30f)
+        else if (Player.instance.stats.sedeAtual < 30f)
         {
             // Sede moderada: regen reduzida
             Player.instance.RecuperarStamina(3.6f);
@@ -117,21 +109,21 @@ public class GameController : MonoBehaviour
         }
 
         // Se nenhum efeito negativo, regen normal
-        if (Player.instance.fomeAtual >= 30f && Player.instance.sedeAtual >= 30f)
+        if (Player.instance.stats.fomeAtual >= 30f && Player.instance.stats.sedeAtual >= 30f)
         {
             Player.instance.RecuperarStamina(6f);
             //Debug.Log("Stamina regenerando em 6");
         }
 
         // Garante que vida não passe do limite
-        Player.instance.vidaAtual = Mathf.Clamp(Player.instance.vidaAtual, 0, Player.instance.vidaMaxima);
+        Player.instance.stats.vidaAtual = Mathf.Clamp(Player.instance.stats.vidaAtual, 0, Player.instance.stats.vidaMaxima);
     }
 
     public void ChangeVida(float value) // MUDA A VIDA ACRESCENTANDO MAIS VIDA
     {
-        float vidaAtual = Player.instance.vidaAtual;
+        float vidaAtual = Player.instance.stats.vidaAtual;
         vidaAtual = Validate(value, vidaAtual);
-        Player.instance.vidaAtual = Mathf.RoundToInt(vidaAtual);
+        Player.instance.stats.vidaAtual = Mathf.RoundToInt(vidaAtual);
     }
 
     public void ChangeEstamina(float value)
@@ -141,12 +133,12 @@ public class GameController : MonoBehaviour
 
     public void ChangeFome(float value) // MUDA A FOME ACRESCENTANDO COMIDA
     {
-        Player.instance.fomeAtual = Validate(value, Player.instance.fomeAtual);
+        Player.instance.stats.fomeAtual = Validate(value, Player.instance.stats.fomeAtual);
     }
 
     public void ChangeSede(float value) // MUDA A SEDE ACRESCENTANDO BEBIDA
     {
-        Player.instance.sedeAtual = Validate(value, Player.instance.sedeAtual);
+        Player.instance.stats.sedeAtual = Validate(value, Player.instance.stats.sedeAtual);
     }
 
     private float Validate(float value, float variable) // VALIDAÇAO PARA USAR ITENS DE AUMENTAR OS RECURSOS
@@ -246,9 +238,9 @@ public class GameController : MonoBehaviour
 
     void SaveStats(Dados dados)
     {
-        dados.dadosVida = Player.instance.vidaAtual;
-        dados.dadosFome = Player.instance.fomeAtual;
-        dados.dadosSede = Player.instance.sedeAtual;
+        dados.dadosVida = Player.instance.stats.vidaAtual;
+        dados.dadosFome = Player.instance.stats.fomeAtual;
+        dados.dadosSede = Player.instance.stats.sedeAtual;
     }
     void SaveAudio(Dados dados)
     {
@@ -328,9 +320,9 @@ public class GameController : MonoBehaviour
 
     void LoadStats(Dados dados)
     {
-        Player.instance.vidaAtual = dados.dadosVida;
-        Player.instance.fomeAtual = dados.dadosFome;
-        Player.instance.sedeAtual = dados.dadosSede;
+        Player.instance.stats.vidaAtual = dados.dadosVida;
+        Player.instance.stats.fomeAtual = dados.dadosFome;
+        Player.instance.stats.sedeAtual = dados.dadosSede;
     }
     void LoadAudio(Dados dados)
     {

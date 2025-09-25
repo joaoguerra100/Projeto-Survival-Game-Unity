@@ -56,7 +56,7 @@ public class HandCombat : MonoBehaviour
                 if (holdTime >= holdThreshold)
                 {
                     const float custoEstaminaForte = 15f;
-                    if (Player.instance.estaminaAtual >= custoEstaminaForte)
+                    if (Player.instance.stats.estaminaAtual >= custoEstaminaForte)
                     {
                         PlayerBracos.instance.anim.SetTrigger("AtaqueForte");
                         Player.instance.anim.SetTrigger("AtaqueForte");
@@ -79,7 +79,7 @@ public class HandCombat : MonoBehaviour
 
                     float custoEstamina = estaminaCombo[index];
 
-                    if (Player.instance.estaminaAtual >= custoEstamina)
+                    if (Player.instance.stats.estaminaAtual >= custoEstamina)
                     {
                         usarPunho = true;
                         espearAtaque = true;

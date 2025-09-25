@@ -41,8 +41,8 @@ public class PlayerBracos : MonoBehaviour
 
     void Start()
     {
-        /* arma = FindAnyObjectByType<Arma>();
-        armaMelee = FindAnyObjectByType<ArmaMelee>(); */
+        arma = FindAnyObjectByType<Arma>();
+        armaMelee = FindAnyObjectByType<ArmaMelee>();
     }
 
     void Update()
@@ -83,7 +83,7 @@ public class PlayerBracos : MonoBehaviour
         {
             if (arma != null)
                 arma.ligarGzimos = !arma.ligarGzimos;
-            
+
             else if (armaMelee != null)
             {
 
@@ -135,6 +135,47 @@ public class PlayerBracos : MonoBehaviour
         estaDesarmado = false;
     }
 
+    public void PrepararVelocidadeDeAtaque()
+    {
+        if (armaMelee == null) return;
+
+        // --- 1. Multiplicador de Estamina ---
+        // Mapeia a estamina atual (0 a 100) para uma faixa de velocidade (ex: 60% a 100%)
+        // Com estamina cheia, a velocidade é normal (1.0). Com estamina vazia, é 40% (0.4).
+        float minSpeedPorEstamina = 0.4f;
+        float maxSpeedPorEstamina = 1.0f;
+        float porcentagemEstamina = Player.instance.stats.estaminaAtual / Player.instance.stats.estaminaMax;
+        float multEstamina = Mathf.Lerp(minSpeedPorEstamina, maxSpeedPorEstamina, porcentagemEstamina);
+
+        // --- 2. Multiplicador de Peso da Arma ---
+        // A velocidade é o inverso do peso. Peso 1 = vel. 1. Peso 2 = vel. 0.5. Peso 0.8 = vel. 1.25.
+        float multPeso = 1f / armaMelee.weaponData.pesoArma;
+
+        // --- 3. Multiplicador de Força ---
+        // Ex: A cada 10 pontos de força, ganha 10% de velocidade. Força base 10 = 1.0.
+        //para cada ponto de força acima de 10, você ganha 1% de bônus de velocidade. 1 de força e igual a 1%
+        //A força 10 e o numero "padrao" onde nao tem buff e nem debuff
+        float multForca = 1f + ((Player.instance.stats.forca - 10f) * 0.01f);
+
+        // --- Cálculo Final ---
+        float velocidadeFinal = multEstamina * multPeso * multForca;
+
+        // Garante que a velocidade não seja negativa
+        if (velocidadeFinal < 0.1f)
+        {
+            velocidadeFinal = 0.1f;
+        }
+
+        // Aplica a velocidade ao animator!
+        anim.speed = velocidadeFinal;
+    }
+
+    public void ResetarVelocidadeAnimacao()
+    {
+        // Restaura a velocidade para o padrão
+        anim.speed = 1f;
+    }
+
     #region Desarmado
 
     public void Desarmar()
@@ -167,6 +208,11 @@ public class PlayerBracos : MonoBehaviour
     public void TrocarAnimator()
     {
         Player.instance.trocaAnimator = false;
+    }
+
+    public void EventoFimAtaque()
+    {
+        armaMelee.EventoFimAtaque();
     }
 
 

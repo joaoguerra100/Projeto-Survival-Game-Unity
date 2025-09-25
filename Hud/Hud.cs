@@ -6,6 +6,7 @@ public class Hud : MonoBehaviour
 {
     [Header("Scripts")]
     public static Hud instance;
+    private CharacterStats playerStats;
 
     [Header("Muniçao Txt")]
     public TMP_Text QtdDeMuniçaoAtual;
@@ -31,7 +32,12 @@ public class Hud : MonoBehaviour
     }
     void Start()
     {
+        playerStats = Player.instance.stats;
         qtdMunicaoGo.SetActive(false);
+        playerStats.OnVidaMudou += AtualizarBarraDeVida;
+        playerStats.OnEstaminaMudou += AtualizarBarraDeEstamina;
+        playerStats.OnFomeMudou += AtualizarBarraDeFome;
+        playerStats.OnSedeMudou += AtualizarBarraDeSede;
     }
 
     void Update()
@@ -39,10 +45,22 @@ public class Hud : MonoBehaviour
         AtualizarPorcentagemDeFomeSede();
     }
 
+    //E chamado quando o objeto e destruido
+    private void OnDestroy()
+    {
+        if (playerStats != null)
+        {
+            playerStats.OnVidaMudou -= AtualizarBarraDeVida;
+            playerStats.OnEstaminaMudou -= AtualizarBarraDeEstamina;
+            playerStats.OnFomeMudou -= AtualizarBarraDeFome;
+            playerStats.OnSedeMudou -= AtualizarBarraDeSede;
+        }
+    }
+
     public void AtualizarPorcentagemDeFomeSede()
     {
-        QtdDeFomeAtual.text = "" + Mathf.RoundToInt(Player.instance.fomeAtual) + "%"; //ARREDONDA PARA O NUMERO INTEIRO MAIS PROXIMO
-        QtdDeSedeAtual.text = "" + Mathf.RoundToInt(Player.instance.sedeAtual) + "%";
+        QtdDeFomeAtual.text = "" + Mathf.RoundToInt(Player.instance.stats.fomeAtual) + "%"; //ARREDONDA PARA O NUMERO INTEIRO MAIS PROXIMO
+        QtdDeSedeAtual.text = "" + Mathf.RoundToInt(Player.instance.stats.sedeAtual) + "%";
     }
 
     public void AtualizarContadorDeMuniçao(int municao, int municaoParaRecarregar)
@@ -52,31 +70,34 @@ public class Hud : MonoBehaviour
 
     }
 
-    public void ChangeSlider(SliderType sliderType, float valueAtual, float valueMax)
+    #region AtualizarStatus
+
+    private void AtualizarBarraDeVida(float atual, float maximo)
     {
-        switch (sliderType)
-        {
-            case SliderType.VIDA:
-                barraDeVida.value = valueAtual;
-                barraDeVida.maxValue = valueMax;
-                break;
-
-            case SliderType.ESTAMINA:
-                barraDeEstamina.value = valueAtual;
-                barraDeEstamina.maxValue = valueMax;
-                break;
-
-            case SliderType.FOME:
-                barraDeFome.value = valueAtual;
-                barraDeFome.maxValue = valueMax;
-                break;
-
-            case SliderType.SEDE:
-                barraDeSede.value = valueAtual;
-                barraDeSede.maxValue = valueMax;
-                break;
-        }
+        barraDeVida.maxValue = maximo;
+        barraDeVida.value = atual;
     }
+
+    private void AtualizarBarraDeEstamina(float atual, float maximo)
+    {
+        barraDeEstamina.maxValue = maximo;
+        barraDeEstamina.value = atual;
+    }
+
+    private void AtualizarBarraDeFome(float atual, float maximo)
+    {
+        barraDeFome.maxValue = maximo;
+        barraDeFome.value = atual;
+        QtdDeFomeAtual.text = "" + Mathf.RoundToInt(atual) + "%";
+    }
+
+    private void AtualizarBarraDeSede(float atual, float maximo)
+    {
+        barraDeSede.maxValue = maximo;
+        barraDeSede.value = atual;
+        QtdDeSedeAtual.text = "" + Mathf.RoundToInt(atual) + "%";
+    }
+    #endregion
 
     public void DesativarHud()
     {

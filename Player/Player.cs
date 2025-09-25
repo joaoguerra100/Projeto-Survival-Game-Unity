@@ -12,33 +12,17 @@ public class Player : MonoBehaviour
     [Header("Referencias")]
     private CharacterController characterController;
     [HideInInspector] public Animator anim;
+    [HideInInspector]public CharacterStats stats;
 
     [Header("Cameras")]
     private Transform myCamera;
 
     [Header("Vida")]
-    public float vidaMaxima;
-    public float vidaAtual;
     [HideInInspector] public bool morte;
-    public bool sangrando;
     private bool travado = false;
     private float tempoTravado = 0f;
 
-    [Header("Estamina")]
-    public float estaminaMax;
-    public float estaminaAtual;
-
-    [Header("Fome")]
-    public float fomeMaxima;
-    public float fomeAtual;
-
-    [Header("Sede")]
-    public float sedeMaxima;
-    public float sedeAtual;
-
     [Header("Movimentaçao")]
-    public float velocidadeJogador;
-    public float multiplicadorVelCorrida;
     [HideInInspector] public float velocidadeAtual;
     [HideInInspector] public Vector3 movimentosJogador;
     private float inputX, inputZ;
@@ -94,6 +78,7 @@ public class Player : MonoBehaviour
     {
         instance = this;
         characterController = GetComponent<CharacterController>();
+        stats = GetComponent<CharacterStats>();
         anim = GetComponent<Animator>();
         myCamera = Camera.main.transform; // pegamos referencia da nossa camera princial
     }
@@ -102,13 +87,6 @@ public class Player : MonoBehaviour
     {
         //podeBater = true;
         coletarPainel.SetActive(false);
-
-        //ATRIBUIÇOES:
-        vidaAtual = vidaMaxima;
-        estaminaAtual = estaminaMax;
-        fomeAtual = fomeMaxima;
-        sedeAtual = sedeMaxima;
-
     }
 
     void Update()
@@ -136,8 +114,7 @@ public class Player : MonoBehaviour
 
             return;
         }
-        EfeitosNegativos();
-        velocidadeAtual = velocidadeJogador;
+        velocidadeAtual = stats.velAndar;
         Movimentacao();
         AplicarPenalidades();
         MoverJogador();
@@ -168,10 +145,10 @@ public class Player : MonoBehaviour
     void MoverJogador()
     {
 
-        if (Input.GetKey(KeyCode.LeftShift) && movimentosJogador.magnitude > 0.1f && estaminaAtual > 0)
+        if (Input.GetKey(KeyCode.LeftShift) && movimentosJogador.magnitude > 0.1f && stats.estaminaAtual > 0)
         {
             correndo = true;
-            velocidadeAtual = velocidadeAtual * multiplicadorVelCorrida;
+            velocidadeAtual = velocidadeAtual * stats.multiplicadorVelCorrida;
             UsarStaminaContinuo(5f);
         }
         else
@@ -179,9 +156,9 @@ public class Player : MonoBehaviour
             correndo = false;
 
             if (movimentosJogador.magnitude < 0.1f)
-                RecuperarStamina(6f);  // Recupera mais rápido parado
+                RecuperarStamina(3f);  // Recupera mais rápido parado
             else
-                RecuperarStamina(3f);  // Recupera menos andando
+                RecuperarStamina(1.5f);  // Recupera menos andando
         }
 
         if (movimentosJogador.magnitude >= 0.1f)
@@ -224,25 +201,25 @@ public class Player : MonoBehaviour
 
     void UsarStaminaContinuo(float taxaPorSegundo) //Para açoes continuas como correr
     {
-        if (estaminaAtual > 0)
+        if (stats.estaminaAtual > 0)
         {
-            estaminaAtual -= taxaPorSegundo * Time.deltaTime;
-            estaminaAtual = Mathf.Max(estaminaAtual, 0); // Impede valores negativos
+            stats.estaminaAtual -= taxaPorSegundo * Time.deltaTime;
+            stats.estaminaAtual = Mathf.Max(stats.estaminaAtual, 0); // Impede valores negativos
         }
     }
 
     public void UsarStamina(float quantidade) //Para açoes pontuais como ataques
     {
-        estaminaAtual -= quantidade;
-        estaminaAtual = Mathf.Max(estaminaAtual, 0);
+        stats.estaminaAtual -= quantidade;
+        stats.estaminaAtual = Mathf.Max(stats.estaminaAtual, 0);
     }
 
     public void RecuperarStamina(float taxaRecuperacao)
     {
         if (!correndo /*&& !HandCombat.instance.isAttacking && HandCombat.instance.idCombo == 0*/)
         {
-            estaminaAtual += taxaRecuperacao * Time.deltaTime;
-            estaminaAtual = Mathf.Min(estaminaAtual, estaminaMax);
+            stats.estaminaAtual += taxaRecuperacao * Time.deltaTime;
+            stats.estaminaAtual = Mathf.Min(stats.estaminaAtual, stats.estaminaMax);
         }
     }
 
@@ -255,30 +232,30 @@ public class Player : MonoBehaviour
 
     void AplicarPenalidades()
     {
-        float percentual = estaminaAtual / estaminaMax;
+        float percentual = stats.estaminaAtual / stats.estaminaMax;
 
         if (percentual >= 0.5f)
         {
-            velocidadeAtual = velocidadeJogador;
+            velocidadeAtual = stats.velAndar;
             anim.SetBool("Cansado", false);
             //tempoAtaqueAtual = tempoAtaqueBase;
             // Sem penalidade
         }
         else if (percentual >= 0.3f)
         {
-            velocidadeAtual = velocidadeJogador * 0.9f;
+            velocidadeAtual = stats.velAndar * 0.9f;
             anim.SetBool("Cansado", false);
             //tempoAtaqueAtual = tempoAtaqueBase;
         }
         else if (percentual >= 0.1f)
         {
-            velocidadeAtual = velocidadeJogador * 0.75f;
+            velocidadeAtual = stats.velAndar * 0.75f;
             anim.SetBool("Cansado", false);
             //tempoAtaqueAtual = tempoAtaqueBase * 1.3f;
         }
         else if (percentual > 0f)
         {
-            velocidadeAtual = velocidadeJogador * 0.5f;
+            velocidadeAtual = stats.velAndar * 0.5f;
             anim.SetBool("Cansado", true);
             //tempoAtaqueAtual = tempoAtaqueBase * 1.7f;
         }
@@ -297,7 +274,7 @@ public class Player : MonoBehaviour
 
     void MetodoMorte()
     {
-        if (vidaAtual <= 0 && morte == false)
+        if (stats.vidaAtual <= 0 && morte == false)
         {
             morte = true;
             anim.SetTrigger("Morte");
@@ -310,9 +287,9 @@ public class Player : MonoBehaviour
 
     public void DanosPlayer(int quant)
     {
-        if (vidaAtual >= 1)
+        if (stats.vidaAtual >= 1)
         {
-            vidaAtual -= quant;
+            stats.vidaAtual -= quant;
             //AudioManager.instance.MetodoSomFxVozes(AudioManager.instance.fxVozDanos);
             anim.SetTrigger("Danos");
             PlayerBracos.instance.anim.SetTrigger("Danos");
@@ -320,13 +297,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    void EfeitosNegativos()
-    {
-        if (sangrando)
-        {
-            vidaAtual -= 0.6f * Time.deltaTime;
-        }
-    }
+    
 
     public void TravarMovimento(float tempo)
     {
@@ -624,10 +595,7 @@ public class Player : MonoBehaviour
     
     public void PararSangramento()
     {
-        if (sangrando)
-        {
-            sangrando = false;
-        }
+        stats.AplicarSangramento(false);
     }
 
     #endregion
