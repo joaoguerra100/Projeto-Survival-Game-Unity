@@ -35,7 +35,7 @@ public class GameController : MonoBehaviour
     void Awake()
     {
         instance = this;
-        
+
     }
 
     void Start()
@@ -73,50 +73,11 @@ public class GameController : MonoBehaviour
         float perdaFome = (estaSeMovendo ? 0.066f : 0.033f);
         float perdaSede = (estaSeMovendo ? 0.1f : 0.05f);
 
-        // Reduz Fome e Sede
         Player.instance.stats.fomeAtual -= perdaFome * Time.deltaTime;
         Player.instance.stats.fomeAtual = Mathf.Clamp(Player.instance.stats.fomeAtual, 0, Player.instance.stats.fomeMaxima);
 
         Player.instance.stats.sedeAtual -= perdaSede * Time.deltaTime;
         Player.instance.stats.sedeAtual = Mathf.Clamp(Player.instance.stats.sedeAtual, 0, Player.instance.stats.sedeMaxima);
-
-        // --- Penalidades por Fome ---
-        if (Player.instance.stats.fomeAtual < 10f)
-        {
-            // Fome crítica: perde vida
-            Player.instance.stats.vidaAtual -= 0.7f * Time.deltaTime;
-            //Debug.Log("Fome crítica - perdendo vida");
-        }
-        else if (Player.instance.stats.fomeAtual < 30f)
-        {
-            // Fome moderada: regen reduzida
-            Player.instance.RecuperarStamina(3f);
-            //Debug.Log("Fome moderada - stamina reduzida");
-        }
-
-        // --- Penalidades por Sede ---
-        if (Player.instance.stats.sedeAtual < 10f)
-        {
-            // Sede crítica: perde vida
-            Player.instance.stats.vidaAtual -= 0.7f * Time.deltaTime;
-            //Debug.Log("Sede crítica - perdendo vida");
-        }
-        else if (Player.instance.stats.sedeAtual < 30f)
-        {
-            // Sede moderada: regen reduzida
-            Player.instance.RecuperarStamina(3.6f);
-            //Debug.Log("Sede moderada - stamina reduzida");
-        }
-
-        // Se nenhum efeito negativo, regen normal
-        if (Player.instance.stats.fomeAtual >= 30f && Player.instance.stats.sedeAtual >= 30f)
-        {
-            Player.instance.RecuperarStamina(6f);
-            //Debug.Log("Stamina regenerando em 6");
-        }
-
-        // Garante que vida não passe do limite
-        Player.instance.stats.vidaAtual = Mathf.Clamp(Player.instance.stats.vidaAtual, 0, Player.instance.stats.vidaMaxima);
     }
 
     public void ChangeVida(float value) // MUDA A VIDA ACRESCENTANDO MAIS VIDA
@@ -246,7 +207,7 @@ public class GameController : MonoBehaviour
     {
         dados.volumeFx = PauseController.instance.effectVol.value;
         dados.volumeMusica = PauseController.instance.musicsVol.value;
-        
+
     }
     /*void SaveInventory(Dados dados)
     {

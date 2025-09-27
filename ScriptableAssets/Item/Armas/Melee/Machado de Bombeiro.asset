@@ -34,5 +34,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5186ca393746aff4ba932ac7c361e5a9, type: 2}
   tipoEquip: 15
   danoArma: 10
-  custoEstaminaAtackFraco: 5
-  custoEstaminaAtackForte: 10
+  custoEstaminaAtackFraco: 10
+  custoEstaminaAtackForte: 15
+  pesoArma: 1

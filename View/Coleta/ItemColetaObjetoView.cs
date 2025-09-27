@@ -230,7 +230,7 @@ public class ItemColetaObjetoView : MonoBehaviour
 
     void AtualizarTexto()
     {
-        btnTxt.text = "Aperte E para interagir Com: " + lootTable.nomeContainer;
+        btnTxt.text = $"Aperte {InputManager.instance.collectKey} para interagir Com: " + lootTable.nomeContainer;
     }
 
     #endregion

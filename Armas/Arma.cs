@@ -79,8 +79,8 @@ public class Arma : MonoBehaviour
 
     public void Atirar()
     {
-        bool mirando = Input.GetButton("Fire2");
-        bool apertandoBotao = weaponData.modoDeTiro == ModoDeTiro.SEMIAUTOMATICA ? Input.GetButtonDown("Fire1") : Input.GetButton("Fire1");
+        bool mirando = Input.GetKey(InputManager.instance.aimKey);
+        bool apertandoBotao = weaponData.modoDeTiro == ModoDeTiro.SEMIAUTOMATICA ? Input.GetKeyDown(InputManager.instance.fireKey) : Input.GetKey(InputManager.instance.fireKey);
 
         PlayerBracos.instance.anim.SetBool("Mirando", mirando);
         PlayerBracos.instance.crosshairPanel.SetActive(!mirando);
@@ -138,7 +138,7 @@ public class Arma : MonoBehaviour
 
     public void TrocarModoDeTiro()
     {
-        if (weaponData.podeTrocarModoTiro == true && Input.GetKeyDown(KeyCode.B))
+        if (weaponData.podeTrocarModoTiro == true && Input.GetKeyDown(InputManager.instance.switchFireModeKey))
         {
             weaponData.modoDeTiro = weaponData.modoDeTiro == ModoDeTiro.AUTOMATICA ? ModoDeTiro.SEMIAUTOMATICA : ModoDeTiro.AUTOMATICA;
             AudioManager.instance.TocarFx(AudioManager.instance.trocarModoDeTiro);
@@ -281,7 +281,7 @@ public class Arma : MonoBehaviour
     {
         if (Player.instance.bloqueioControle == false && Player.instance.trocaAnimator == false)
         {
-            if (Input.GetKeyDown(KeyCode.R))
+            if (Input.GetKeyDown(InputManager.instance.reloadKey))
             {
                 if (equipedWeapon.currentAmmo == weaponData.municaoMaxima || weaponData.municaoParaRecarregar == 0)
                     return;
@@ -332,7 +332,7 @@ public class Arma : MonoBehaviour
 
     void VerificarInterrupcaoRecarga()
     {
-        if (PlayerBracos.instance.carregandoArma && Input.GetButtonDown("Fire1") && weaponData.tipoDeRecarga == TipoDeRecarga.BalaPorBala)
+        if (PlayerBracos.instance.carregandoArma && Input.GetKeyDown(InputManager.instance.fireKey) && weaponData.tipoDeRecarga == TipoDeRecarga.BalaPorBala)
         {
             if (coroutineRecarga != null)
             {

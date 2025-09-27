@@ -62,7 +62,7 @@ public class HandCombat : MonoBehaviour
                         Player.instance.anim.SetTrigger("AtaqueForte");
 
                         danos = 16;
-                        Player.instance.UsarStamina(custoEstaminaForte);
+                        Player.instance.stats.UsarStamina(custoEstaminaForte);
 
                         isAttacking = true;
                         StartCoroutine(TempoParaBater(2.5f));
@@ -88,7 +88,7 @@ public class HandCombat : MonoBehaviour
                         Player.instance.anim.SetInteger("IdCombo", idCombo);
 
                         danos = (int)danosCombo[index];
-                        Player.instance.UsarStamina(custoEstamina);
+                        Player.instance.stats.UsarStamina(custoEstamina);
 
                         if (idCombo >= 3)
                         {

@@ -46,16 +46,16 @@ public class ArmaMelee : MonoBehaviour
     {
         if (isAttacking) return; // bloqueia novos ataques enquanto estiver atacando
 
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetKeyDown(InputManager.instance.attackKey))
         {
             isHolding = true;
             holdTime = 0f;
         }
-        if (isHolding && Input.GetButton("Fire1"))
+        if (isHolding && Input.GetKey(InputManager.instance.attackKey))
         {
             holdTime += Time.deltaTime;
         }
-        if (Input.GetButtonUp("Fire1"))
+        if (Input.GetKeyUp(InputManager.instance.attackKey))
         {
             isHolding = false;
             PerformAttack();
@@ -73,7 +73,7 @@ public class ArmaMelee : MonoBehaviour
                 PlayerBracos.instance.PrepararVelocidadeDeAtaque();
                 PlayerBracos.instance.anim.SetTrigger("AtaqueForte");
                 //Player.instance.anim.SetTrigger("AtaqueForte");
-                Player.instance.UsarStamina(weaponData.custoEstaminaAtackForte);
+                Player.instance.stats.UsarStamina(weaponData.custoEstaminaAtackForte);
             }
         }
         // Ataque Fraco
@@ -85,7 +85,7 @@ public class ArmaMelee : MonoBehaviour
                 PlayerBracos.instance.PrepararVelocidadeDeAtaque();
                 PlayerBracos.instance.anim.SetTrigger("AtaqueFraco");
                 //Player.instance.anim.SetTrigger("AtaqueFraco");
-                Player.instance.UsarStamina(weaponData.custoEstaminaAtackFraco);
+                Player.instance.stats.UsarStamina(weaponData.custoEstaminaAtackFraco);
             }
         }
     }
@@ -102,21 +102,25 @@ public class ArmaMelee : MonoBehaviour
         //Detecta todos os inimigos dentro do raio de ataque
         Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRadius, enemyLayer);
 
+        System.Collections.Generic.List<Zumbi> zumbisAtingidos = new System.Collections.Generic.List<Zumbi>();
+
         foreach (Collider enemycollider in hitEnemies)
         {
-            Zumbi zumbis = enemycollider.GetComponent<Zumbi>();
-            if (zumbis != null)
+            Zumbi zumbi = enemycollider.GetComponentInParent<Zumbi>();
+            if (zumbi != null && !zumbisAtingidos.Contains(zumbi))
             {
+                zumbisAtingidos.Add(zumbi);
+
                 AnimatorStateInfo stateInfo = PlayerBracos.instance.anim.GetCurrentAnimatorStateInfo(0);
 
                 if (stateInfo.IsName("AtaqueForte"))
                 {
                     var danoArma = weaponData.danoArma * 1.5f;
-                    zumbis.Danos((int)danoArma);
+                    zumbi.Danos((int)danoArma);
                 }
                 else
                 {
-                    zumbis.Danos((int)weaponData.danoArma);
+                    zumbi.Danos((int)weaponData.danoArma);
                 }
             }
         }

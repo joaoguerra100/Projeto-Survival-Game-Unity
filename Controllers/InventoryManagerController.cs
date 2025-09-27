@@ -33,9 +33,6 @@ public class InventoryManagerController : MonoBehaviour
     public GenericBagScriptable mochilaBag;
     [SerializeField] public ClothingWeaponScriptable currentClothingWeapon;
 
-    [Header("Teclas")]
-    [SerializeField] protected List<KeyCode> keyCodesShortCutList;
-
     [Header("Animation")]
     [SerializeField] private AnimationCurve curveRate;
 
@@ -44,15 +41,46 @@ public class InventoryManagerController : MonoBehaviour
 
     #endregion
 
-    #region Methods
+    #region Methods Iniciais
 
     void Awake()
     {
         instance = this;
     }
 
+    void OnDisable()
+    {
+        if (InputManager.instance != null)
+        {
+            InputManager.instance.OnInventoryKeyPressed -= HandleInventoryToggle;
+            InputManager.instance.OnShortcut1Pressed -= HandleShortcut1;
+            InputManager.instance.OnShortcut2Pressed -= HandleShortcut2;
+            InputManager.instance.OnShortcut3Pressed -= HandleShortcut3;
+            InputManager.instance.OnShortcut4Pressed -= HandleShortcut4;
+            InputManager.instance.OnShortcut5Pressed -= HandleShortcut5;
+            
+        }
+    }
+
     void Start()
     {
+        if (InputManager.instance != null)
+        {
+            // Sintoniza no anúncio "OnInventoryKeyPressed" e define qual método executar
+            InputManager.instance.OnInventoryKeyPressed += HandleInventoryToggle;
+
+            // Sintoniza nos atalhos
+            InputManager.instance.OnShortcut1Pressed += HandleShortcut1;
+            InputManager.instance.OnShortcut2Pressed += HandleShortcut2;
+            InputManager.instance.OnShortcut3Pressed += HandleShortcut3;
+            InputManager.instance.OnShortcut4Pressed += HandleShortcut4;
+            InputManager.instance.OnShortcut5Pressed += HandleShortcut5;
+        }
+        else
+        {
+            Debug.LogError("InputManager.instance não encontrado! O sistema de input não funcionará.");
+        }
+
         ClothingWeaponView.instance.Iniciate(currentClothingWeapon);
         IniciarSlotsBags();
 
@@ -62,7 +90,7 @@ public class InventoryManagerController : MonoBehaviour
             ShortCutView.instance.IniciateShortCutSlots(bag.MaxShortCutSlot, globalShortcutIndex);
             globalShortcutIndex += bag.MaxShortCutSlot;
         }
-        
+
 
         ShowAndHide();
 
@@ -70,58 +98,79 @@ public class InventoryManagerController : MonoBehaviour
 
     void Update()
     {
-        // primeiro numero e qual shortcut sera usado, o segundo numero fala em qual lugar ele sera colocado no clothing weapon
-       for (int i = 0; i < keyCodesShortCutList.Count; i++)
-        {
-            if (Input.GetKeyDown(keyCodesShortCutList[i]))
-            {
-                UseShortCutToEquipItem(i, 5);
-            }
-        }
-
         /*if (Input.GetKeyDown(KeyCode.G)) // espawnar itens
         {
             BuildMeshModel(1, 1);
         }*/
+    }
 
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            ShowAndHide();
-            PlayerBracos.instance.ShowAndHideCrossHair();
-            Player.instance.conteinerAberto = false;
-        }
+    #endregion
+
+    #region Metodos de eventos
+
+    private void HandleInventoryToggle()
+    {
+        ShowAndHide();
+        PlayerBracos.instance.ShowAndHideCrossHair();
+        Player.instance.conteinerAberto = false;
+
         if (InventoryView.instance.VisiblePanel == false)
         {
             EsconderItemAction();
         }
     }
 
-    /*public bool AddItemToCurrentBag(GenericItemScriptable newItem, int number, bool exceptionCase, WeaponItemScriptable weaponData)
+    private void HandleShortcut1()
     {
-        bool result = false;
+        UseShortCutToEquipItem(1, 5);
+    }
+    private void HandleShortcut2()
+    {
+        UseShortCutToEquipItem(2, 5);
+    }
+    private void HandleShortcut3()
+    {
+        UseShortCutToEquipItem(3, 5);
+    }
+    private void HandleShortcut4()
+    {
+        UseShortCutToEquipItem(4, 5);
+    }
+    private void HandleShortcut5()
+    {
+        UseShortCutToEquipItem(5, 5);
+    }
 
-        //VERIFICAR SE E UMA exceptionCase
-        if (!InventoryView.instance.VisiblePanel || exceptionCase)
-        {
-            result = currentBag.AddItem(newItem, number, weaponData);
+    #endregion
 
-            if (result)
+    #region Methods
+
+    /*public bool AddItemToCurrentBag(GenericItemScriptable newItem, int number, bool exceptionCase, WeaponItemScriptable weaponData)
             {
-                List<InventoryItem> inventoryItems = currentBag.ReturnFullListInventoryItem();
-                //InventoryView.instance.UpdateAllItems(inventoryItems);
-            }
+                bool result = false;
 
-            if (currentBag.UsedOrganizeBtSizePryority)
-            {
-                List<InventoryItem> inventoryItems = currentBag.ReturnFullListInventoryItem();
-                //InventoryView.instance.UpdateAllItems(inventoryItems);
-                currentBag.UsedOrganizeBtSizePryority = false;
-            }
-            //RefreshShortCutViewByItem(newItem);
-        }
-        UpdateCurrentWeigthChar(); //ATIVAR CASO QUEIRA QUE DIMINUA A VELOCIDADE DO PLAYER ANTES DE ULTRAPASSAR O LIMITE
-        return result;
-    }*/
+                //VERIFICAR SE E UMA exceptionCase
+                if (!InventoryView.instance.VisiblePanel || exceptionCase)
+                {
+                    result = currentBag.AddItem(newItem, number, weaponData);
+
+                    if (result)
+                    {
+                        List<InventoryItem> inventoryItems = currentBag.ReturnFullListInventoryItem();
+                        //InventoryView.instance.UpdateAllItems(inventoryItems);
+                    }
+
+                    if (currentBag.UsedOrganizeBtSizePryority)
+                    {
+                        List<InventoryItem> inventoryItems = currentBag.ReturnFullListInventoryItem();
+                        //InventoryView.instance.UpdateAllItems(inventoryItems);
+                        currentBag.UsedOrganizeBtSizePryority = false;
+                    }
+                    //RefreshShortCutViewByItem(newItem);
+                }
+                UpdateCurrentWeigthChar(); //ATIVAR CASO QUEIRA QUE DIMINUA A VELOCIDADE DO PLAYER ANTES DE ULTRAPASSAR O LIMITE
+                return result;
+            }*/
 
     /*public void OrganizeItem()
     {
@@ -138,7 +187,7 @@ public class InventoryManagerController : MonoBehaviour
 
         if (origin != null && id >= 0)
         {
-            result = origin.RemoverItem(id,idUnico);
+            result = origin.RemoverItem(id, idUnico);
             RemoveItemFromShortCut(idUnico);
             StartCoroutine(RefreshInventoryView());
         }
@@ -147,7 +196,7 @@ public class InventoryManagerController : MonoBehaviour
         return result;
     }
 
-    public bool DropItem(InventoryItem item,GenericBagScriptable bag)
+    public bool DropItem(InventoryItem item, GenericBagScriptable bag)
     {
         bool result = false;
         int currentNumber;
@@ -174,7 +223,7 @@ public class InventoryManagerController : MonoBehaviour
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -225,7 +274,7 @@ public class InventoryManagerController : MonoBehaviour
 
         StartCoroutine(RefreshInventoryView());
         StartCoroutine(RefreshClothingWeaponView());
- 
+
     }
 
     #endregion
@@ -237,7 +286,7 @@ public class InventoryManagerController : MonoBehaviour
         yield return null; // Espera 1 frame
         myScrollRect.verticalNormalizedPosition = 1f;
     }
-    
+
     #endregion
 
     #region Multiplos Inventarios
@@ -283,7 +332,7 @@ public class InventoryManagerController : MonoBehaviour
 
     void IniciarSlotsBags()
     {
-        
+
         if (vesteBag != null) { InventoryView.instance.Iniciate(vesteBag, 0); }
         if (blusaBag != null) { InventoryView.instance.Iniciate(blusaBag, 1); }
         if (calcaBag != null) { InventoryView.instance.Iniciate(calcaBag, 2); }
@@ -326,7 +375,7 @@ public class InventoryManagerController : MonoBehaviour
 
     #region Methods Usar
 
-    private void UseItem(GenericBagScriptable bag,int id, int value)
+    private void UseItem(GenericBagScriptable bag, int id, int value)
     {
         bool result = bag.UseItem(id, value);
 
@@ -339,7 +388,7 @@ public class InventoryManagerController : MonoBehaviour
             if (itemResult.baseItemData.CurrentNumber <= 0 && itemResult.baseItemData.RemoveWhenNumberIsZero)
             {
                 //DropItem(itemResult);
-                bag.RemoverItem(itemResult.baseItemData.Id,itemResult.instanceID);
+                bag.RemoverItem(itemResult.baseItemData.Id, itemResult.instanceID);
                 StartCoroutine(RefreshInventoryView());
                 EsconderItemAction();
             }
@@ -353,7 +402,7 @@ public class InventoryManagerController : MonoBehaviour
             InventoryItem itemResult = bag.FindItemByTipoDeMunicao(tipoDeMunicao);
 
             if (itemResult == null || itemResult.baseItemData == null)
-            continue;
+                continue;
 
             bool result = bag.UseAmmunition(tipoDeMunicao, qtdDeMunicao);
 
@@ -383,34 +432,34 @@ public class InventoryManagerController : MonoBehaviour
             {
                 if (instancia != null && instancia.equipado == false)
                 {
-                    AddAction("Equipar", () => PerformActionEquip(idUnico,bag));
+                    AddAction("Equipar", () => PerformActionEquip(idUnico, bag));
                 }
                 else if (instancia != null && instancia.equipado == true)
                 {
-                    AddAction("Desequipar", () => PerformActionEquip(idUnico,bag));
+                    AddAction("Desequipar", () => PerformActionEquip(idUnico, bag));
                 }
                 if (item.baseItemData.IsDroppable)
                 {
-                    AddAction("Dropar", () => PerfomActionDropWeaponItem(idUnico,bag));
+                    AddAction("Dropar", () => PerfomActionDropWeaponItem(idUnico, bag));
                 }
             }
             else if (item.baseItemData.TipoDeItem == ItemType.COMIDA_BEBIDA || item.baseItemData.TipoDeItem == ItemType.ITEN_MEDICO)
             {
-                
-                AddAction("Usar", () => UseItem(bag,itemIndiceID, 1));
+
+                AddAction("Usar", () => UseItem(bag, itemIndiceID, 1));
                 if (item.baseItemData.IsDroppable)
                 {
-                    AddAction("Dropar", () => DropItem(item,bag));
+                    AddAction("Dropar", () => DropItem(item, bag));
                 }
             }
             else
             {
                 if (item.baseItemData.IsDroppable)
                 {
-                    AddAction("Dropar", () => DropItem(item,bag));
+                    AddAction("Dropar", () => DropItem(item, bag));
                 }
             }
-            
+
             break; // ← item encontrado e processado, pode sair do loop
         }
     }
@@ -470,7 +519,7 @@ public class InventoryManagerController : MonoBehaviour
         }
     }
 
-    public bool PerfomActionDropWeaponItem(string itemIndiceID,GenericBagScriptable bag)
+    public bool PerfomActionDropWeaponItem(string itemIndiceID, GenericBagScriptable bag)
     {
         InventoryItem item = bag.FindInventoryItemByStringID(itemIndiceID);
         FireWeaponInstance fireWeaponInstance = bag.FindWeaponInstanceByStringID(item.instanceID);
@@ -655,7 +704,7 @@ public class InventoryManagerController : MonoBehaviour
             Debug.LogWarning("[ClothingWeapon] Item não está associado a nenhuma bag.");
             return false;
         }
-        
+
         FireWeaponInstance fireWeapon = origemBag.FindWeaponInstanceByStringID(item.instanceID);
         if (fireWeapon == null)
         {
@@ -672,8 +721,8 @@ public class InventoryManagerController : MonoBehaviour
             equipedWeapon = fireWeapon;
             UpdateCurrentWeigthChar(); //ATIVAR CASO QUEIRA QUE DIMINUA A VELOCIDADE DO PLAYER ANTES DE ULTRAPASSAR O LIMITE
             return RemoveItem(origemBag, item.baseItemData.Id, item.instanceID);
-        }  
-        
+        }
+
         return false;
     }
 
@@ -790,13 +839,13 @@ public class InventoryManagerController : MonoBehaviour
         }
 
         //ITEMDROP VINDO DO SHORTCUT
-            if (originTag.Equals("SpecialSlot"))
+        if (originTag.Equals("SpecialSlot"))
+        {
+            if (!item.baseItemData.Equipado)
             {
-                if (!item.baseItemData.Equipado)
-                {
-                    return RemoveItemFromShortCut(item.instanceID);
-                }
+                return RemoveItemFromShortCut(item.instanceID);
             }
+        }
 
         //ITEMDROP VINDO DO CLOTHINGWEAPONS
         if (originTag.Equals("ClothingWeaponSlot"))
@@ -819,7 +868,7 @@ public class InventoryManagerController : MonoBehaviour
     #endregion
 
     #region ShortCut Methods
-    
+
     private bool AddItemToCurrentShortCut(int index, InventoryItem item)
     {
         BagScriptable resultBag = CastGenericBagToBag();
@@ -830,7 +879,7 @@ public class InventoryManagerController : MonoBehaviour
             RefreshShortCutViewByItem(item);
             return result;
         }
-        
+
         return false;
     }
 
@@ -845,7 +894,7 @@ public class InventoryManagerController : MonoBehaviour
             StartCoroutine(RefreshShortCutView());
             return true;
         }
-        
+
         return false;
     }
 
@@ -859,7 +908,7 @@ public class InventoryManagerController : MonoBehaviour
             StartCoroutine(RefreshShortCutView());
             return true;
         }
-        
+
         return false;
     }
 
@@ -883,7 +932,7 @@ public class InventoryManagerController : MonoBehaviour
         }
     }*/
 
-    private void UseShortCutToEquipItem(int shortcutIndex, int equipSlotIndex)
+    void UseShortCutToEquipItem(int shortcutIndex, int equipSlotIndex)
     {
         if (InventoryView.instance.VisiblePanel) return;
 

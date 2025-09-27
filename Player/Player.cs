@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
     [Header("Referencias")]
     private CharacterController characterController;
     [HideInInspector] public Animator anim;
-    [HideInInspector]public CharacterStats stats;
+    [HideInInspector] public CharacterStats stats;
 
     [Header("Cameras")]
     private Transform myCamera;
@@ -23,10 +23,10 @@ public class Player : MonoBehaviour
     private float tempoTravado = 0f;
 
     [Header("Movimentaçao")]
-    [HideInInspector] public float velocidadeAtual;
+    public float velocidadeAtual;
     [HideInInspector] public Vector3 movimentosJogador;
     private float inputX, inputZ;
-    private bool correndo = false;
+    [HideInInspector]public bool correndo = false;
 
     [Header("Pulo")]
     public float alturaDoPulo;
@@ -44,8 +44,8 @@ public class Player : MonoBehaviour
     private float holdThreshold = 0.5f;
     private float holdTime = 0f;
     private bool isHolding;
-    [HideInInspector]public bool conteinerAberto;
-    [HideInInspector]public ItemColetaObjetoView currentContainerAberto;
+    [HideInInspector] public bool conteinerAberto;
+    [HideInInspector] public ItemColetaObjetoView currentContainerAberto;
 
     [Header("Coleta")]
     private float raycastDistance = 2f;
@@ -116,7 +116,6 @@ public class Player : MonoBehaviour
         }
         velocidadeAtual = stats.velAndar;
         Movimentacao();
-        AplicarPenalidades();
         MoverJogador();
         Agaichar();
         Coletar();
@@ -124,7 +123,6 @@ public class Player : MonoBehaviour
         AbrindoPainelColeta();
         if (bloqueioControle == false && trocaAnimator == false)
         {
-            //BaterMelee();
             Pular();
         }
         Animacoes();
@@ -135,8 +133,9 @@ public class Player : MonoBehaviour
 
     void Movimentacao()
     {
-        inputX = Input.GetAxis("Horizontal");
-        inputZ = Input.GetAxis("Vertical");
+        inputX = InputManager.instance.HorizontalAxis;
+        inputZ = InputManager.instance.VerticalAxis;
+        
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, myCamera.eulerAngles.y, transform.eulerAngles.z); // faz com que a a frente do personagem seja igual a aonde a camera esta apontada
         movimentosJogador = new Vector3(inputX, 0, inputZ).normalized;
         movimentosJogador = transform.TransformDirection(movimentosJogador); // FAZ ESTE VETOR TRABALHAR NO MESMO EIXO QUE O MEU TRANSFORM
@@ -144,27 +143,16 @@ public class Player : MonoBehaviour
 
     void MoverJogador()
     {
+        correndo = Input.GetKey(InputManager.instance.runKey) && movimentosJogador.magnitude > 0.1f && stats.estaminaAtual > 0;
 
-        if (Input.GetKey(KeyCode.LeftShift) && movimentosJogador.magnitude > 0.1f && stats.estaminaAtual > 0)
+        if (correndo)
         {
-            correndo = true;
             velocidadeAtual = velocidadeAtual * stats.multiplicadorVelCorrida;
-            UsarStaminaContinuo(5f);
-        }
-        else
-        {
-            correndo = false;
-
-            if (movimentosJogador.magnitude < 0.1f)
-                RecuperarStamina(3f);  // Recupera mais rápido parado
-            else
-                RecuperarStamina(1.5f);  // Recupera menos andando
         }
 
         if (movimentosJogador.magnitude >= 0.1f)
         {
             characterController.Move(movimentosJogador * velocidadeAtual * Time.deltaTime);
-
         }
     }
 
@@ -172,7 +160,7 @@ public class Player : MonoBehaviour
     {
         estaNochao = Physics.CheckSphere(verificadorChao.position, 0.3f, layerPular);
 
-        if (Input.GetKeyDown(KeyCode.Space) && estaNochao && trocaAnimator == false && bloqueioControle == false)
+        if (Input.GetKeyDown(InputManager.instance.jumpKey) && estaNochao && trocaAnimator == false && bloqueioControle == false)
         {
             velocidadeVertical = Mathf.Sqrt(alturaDoPulo * -2f * gravidade);
         }
@@ -189,84 +177,11 @@ public class Player : MonoBehaviour
 
     void Agaichar()
     {
-        if (Input.GetKeyDown(KeyCode.C) && estaNochao == true)
+        if (Input.GetKeyDown(InputManager.instance.agaichadoKey) && estaNochao == true)
         {
             agaichado = !agaichado;
         }
     }
-
-    #endregion
-
-    #region Estamina
-
-    void UsarStaminaContinuo(float taxaPorSegundo) //Para açoes continuas como correr
-    {
-        if (stats.estaminaAtual > 0)
-        {
-            stats.estaminaAtual -= taxaPorSegundo * Time.deltaTime;
-            stats.estaminaAtual = Mathf.Max(stats.estaminaAtual, 0); // Impede valores negativos
-        }
-    }
-
-    public void UsarStamina(float quantidade) //Para açoes pontuais como ataques
-    {
-        stats.estaminaAtual -= quantidade;
-        stats.estaminaAtual = Mathf.Max(stats.estaminaAtual, 0);
-    }
-
-    public void RecuperarStamina(float taxaRecuperacao)
-    {
-        if (!correndo /*&& !HandCombat.instance.isAttacking && HandCombat.instance.idCombo == 0*/)
-        {
-            stats.estaminaAtual += taxaRecuperacao * Time.deltaTime;
-            stats.estaminaAtual = Mathf.Min(stats.estaminaAtual, stats.estaminaMax);
-        }
-    }
-
-    float CalcularEstaminaMaxima(int nivel)
-    {
-        int estaminaBase = 100;
-        float incrementoBase = 10f;
-        return estaminaBase + incrementoBase * Mathf.Pow(1.15f, nivel - 1);
-    }
-
-    void AplicarPenalidades()
-    {
-        float percentual = stats.estaminaAtual / stats.estaminaMax;
-
-        if (percentual >= 0.5f)
-        {
-            velocidadeAtual = stats.velAndar;
-            anim.SetBool("Cansado", false);
-            //tempoAtaqueAtual = tempoAtaqueBase;
-            // Sem penalidade
-        }
-        else if (percentual >= 0.3f)
-        {
-            velocidadeAtual = stats.velAndar * 0.9f;
-            anim.SetBool("Cansado", false);
-            //tempoAtaqueAtual = tempoAtaqueBase;
-        }
-        else if (percentual >= 0.1f)
-        {
-            velocidadeAtual = stats.velAndar * 0.75f;
-            anim.SetBool("Cansado", false);
-            //tempoAtaqueAtual = tempoAtaqueBase * 1.3f;
-        }
-        else if (percentual > 0f)
-        {
-            velocidadeAtual = stats.velAndar * 0.5f;
-            anim.SetBool("Cansado", true);
-            //tempoAtaqueAtual = tempoAtaqueBase * 1.7f;
-        }
-        else // estamina zero
-        {
-            velocidadeAtual = 0f;
-            anim.SetBool("Cansado", true);
-            //tempoAtaqueAtual = tempoAtaqueBase * 2.5f;
-        }
-    }
-
 
     #endregion
 
@@ -296,8 +211,6 @@ public class Player : MonoBehaviour
             bloqueioControle = true;
         }
     }
-
-    
 
     public void TravarMovimento(float tempo)
     {
@@ -333,7 +246,7 @@ public class Player : MonoBehaviour
 
                 containerView.MostarBotaoInteraçao(true);
 
-                if (Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(InputManager.instance.collectKey))
                 {
                     if (containerView.lootGerado)
                     {
@@ -353,7 +266,7 @@ public class Player : MonoBehaviour
                 }
 
                 // Está segurando E
-                if (isHolding && Input.GetKey(KeyCode.E) && !containerView.lootGerado)
+                if (isHolding && Input.GetKey(InputManager.instance.collectKey) && !containerView.lootGerado)
                 {
                     holdTime += Time.deltaTime;
                     float progresso = holdTime / holdThreshold;
@@ -363,7 +276,7 @@ public class Player : MonoBehaviour
                 }
 
                 // Soltou o E antes de completar
-                if (isHolding && Input.GetKeyUp(KeyCode.E))
+                if (isHolding && Input.GetKeyUp(InputManager.instance.collectKey))
                 {
                     isHolding = false;
                     holdTime = 0f;
@@ -430,7 +343,7 @@ public class Player : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance, layerMaskColetar))
         {
             coletarPainel.SetActive(true);
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(InputManager.instance.collectKey))
             {
                 ItemView item = hit.collider.GetComponent<ItemView>();
                 if (item != null)
@@ -453,11 +366,8 @@ public class Player : MonoBehaviour
                         // Toca animação de pegar normal
                         anim.SetTrigger("ColetarNormal");
                         PlayerBracos.instance.anim.SetTrigger("ColetarNormal");
-
                     }
-
                     item.Coletar();
-
                 }
             }
         }
@@ -516,64 +426,18 @@ public class Player : MonoBehaviour
     #region Animaçoes
     private void Animacoes()
     {
+        bool estaCansado = stats.estaminaAtual < (stats.estaminaMax * 0.1f);
+
         PlayerBracos.instance.anim.SetFloat("Vertical", inputZ);
         PlayerBracos.instance.anim.SetBool("Correndo", correndo);
         PlayerBracos.instance.anim.SetBool("Agaichado", agaichado);
-
-
 
         anim.SetFloat("Horizontal", inputX);
         anim.SetFloat("Vertical", inputZ);
         anim.SetBool("Agaichado", agaichado);
         anim.SetBool("Correndo", correndo);
-
-
+        anim.SetBool("Cansado", estaCansado);
     }
-
-    #endregion
-
-    #region Melee
-
-   /*  private void BaterMelee()
-    {
-        if (isAttacking) return; // bloqueia novos ataques enquanto estiver atacando
-
-        if (PlayerBracos.instance.anim.runtimeAnimatorController == PlayerBracos.instance.controllerMelee)
-        {
-            if (Input.GetButtonDown("Fire1"))
-            {
-                isHolding = true;
-                holdTime = 0;
-            }
-            else if (Input.GetButtonDown("Fire2"))
-            {
-                anim.SetTrigger("Bater2");
-                isAttacking = true;
-                //StartCoroutine(TempoParaBater());
-            }
-
-            if (isHolding && Input.GetButton("Fire1"))
-            {
-                holdTime += Time.deltaTime;
-            }
-
-            if (Input.GetButtonUp("Fire1"))
-            {
-                if (holdTime >= holdThreshold) // Ataque forte
-                {
-                    anim.SetTrigger("AtaqueForte");
-                    isAttacking = true;
-                }
-                else // Ataque normal
-                {
-                    anim.SetTrigger("AtaqueFraco");
-                    isAttacking = true;
-                }
-
-                isHolding = false;
-            }
-        }
-    } */
 
     #endregion
 
@@ -592,7 +456,7 @@ public class Player : MonoBehaviour
     {
         HandCombat.instance.ComboCancelado();
     }
-    
+
     public void PararSangramento()
     {
         stats.AplicarSangramento(false);

@@ -10,6 +10,12 @@ public class ResetarAnimator : StateMachineBehaviour
         HandCombat.instance.espearAtaque = false;
         HandCombat.instance.usarPunho = false;
         HandCombat.instance.idCombo = 0;
+
+        ArmaMelee armaMelee = FindAnyObjectByType<ArmaMelee>();
+        if (armaMelee != null)
+        {
+            armaMelee.EventoFimAtaque();
+        }
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks

@@ -18,7 +18,6 @@ public class Porta : MonoBehaviour, InterfaceInteracao
         [Range(0, 1)]
         public float closeStartFrom = 0.6f;
         public OpenStyle openMethod; //Open by button or automatically?
-        public KeyCode openButton = KeyCode.E; //Button on the keyboard to open the door
         public bool autoClose = false; //Automatically close the door. Forced to true when in AUTOMATIC mode.
     }
     [Serializable]
@@ -67,7 +66,7 @@ public class Porta : MonoBehaviour, InterfaceInteracao
     public DoorSounds doorSounds = new DoorSounds();
     public DoorTexts doorTexts = new DoorTexts();
     public KeySystem keySystem = new KeySystem();
-    public KeyCode BotaoDeInteracao => Controls.openButton;
+    public KeyCode BotaoDeInteracao => InputManager.instance.interactKey;
 
 
     Transform player;
@@ -238,7 +237,7 @@ public class Porta : MonoBehaviour, InterfaceInteracao
         string tempTxt = txt;
 
         if (Controls.openMethod == OpenStyle.BUTTON)
-            tempTxt = txt.Replace("[BUTTON]", "'" + Controls.openButton.ToString() + "'");
+            tempTxt = txt.Replace("[BUTTON]", "'" + BotaoDeInteracao.ToString() + "'");
 
         theText.text = tempTxt;
         TextObj.gameObject.SetActive(true);

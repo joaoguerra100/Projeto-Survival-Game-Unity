@@ -17,11 +17,6 @@ public class Lampada : MonoBehaviour, InterfaceInteracao
         public float _timer = 0.5f;
     }
     [Serializable]
-    public class LampControls
-    {
-        public KeyCode switchButton = KeyCode.E; //Button on the keyboard to open the door
-    }
-    [Serializable]
     public class AnimNames //names of the animations, which you use for every action
     {
         public string AnimName = "LightSwitch";
@@ -43,11 +38,10 @@ public class Lampada : MonoBehaviour, InterfaceInteracao
         public GameObject TextPrefab;
     }
     public LampConfigurations Configurations = new LampConfigurations();
-    public LampControls Controls = new LampControls();
     public AnimNames animNames = new AnimNames();
     public LampSounds lampSounds = new LampSounds();
     public LampTexts lampTexts = new LampTexts();
-    public KeyCode BotaoDeInteracao => Controls.switchButton;
+    public KeyCode BotaoDeInteracao =>InputManager.instance.interactKey;
 
 
     /* [Header("UI Botao de Interaçao")]
@@ -277,7 +271,7 @@ public class Lampada : MonoBehaviour, InterfaceInteracao
         string tempTxt = txt;
 
         
-        tempTxt = txt.Replace("[BUTTON]", "'" + Controls.switchButton.ToString() + "'");
+        tempTxt = txt.Replace("[BUTTON]", "'" + BotaoDeInteracao.ToString() + "'");
 
         theText.text = tempTxt;
         TextObj.gameObject.SetActive(true);

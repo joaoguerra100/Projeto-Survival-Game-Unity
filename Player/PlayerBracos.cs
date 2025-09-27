@@ -215,6 +215,11 @@ public class PlayerBracos : MonoBehaviour
         armaMelee.EventoFimAtaque();
     }
 
+    public void AplicarDano()
+    {
+        armaMelee.AplicarDano();
+    }
+
 
     #endregion
 
