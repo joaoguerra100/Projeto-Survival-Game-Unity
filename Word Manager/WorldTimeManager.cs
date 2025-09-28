@@ -11,8 +11,11 @@ public class WorldTimeManager : MonoBehaviour
     public Light diretionalLight;
     public Gradient lightColorOverTime;
     public AnimationCurve lightIntensityOverTime;
-    public TextMeshProUGUI clockUITxt;
 
+    [Header("Configuraçoes de RelogioTxt")]
+    public TextMeshProUGUI clockUITxt;
+    public TextMeshProUGUI dateUITxt;
+    public TextMeshProUGUI temperaturaUITxt;
     [Header("Configuraçoes de tempo")]
     [Range(0f, 24f)][SerializeField] private float horaAtual;
     [SerializeField] private float duracaoDoDiaEmMinutos;
@@ -48,10 +51,13 @@ public class WorldTimeManager : MonoBehaviour
     {
         horaAtual += Time.deltaTime * timeMultiplier;
         if (horaAtual >= 24f)
+        {
             horaAtual -= 24f;
+            SeasonManager.instance.AvancarDia();
+        }
     }
 
-    void UpdateLighting()
+    public void UpdateLighting()
     {
         float timeNormalized = horaAtual / 24f;
 
@@ -71,6 +77,42 @@ public class WorldTimeManager : MonoBehaviour
             int minutes = Mathf.FloorToInt((horaAtual - hours) * 60f);
             clockUITxt.text = $"{hours:00}:{minutes:00}";
         }
+
+        if (dateUITxt != null && SeasonManager.instance != null)
+        {
+            int diaDoMes = SeasonManager.instance.diaAtualDaEstacao;
+            SeasonManager.Estacao estacaoAtual = SeasonManager.instance.estacaoAtual;
+
+            string numeroDoMes = "";
+            string nomeDoMes = "";
+            switch (estacaoAtual)
+            {
+                case SeasonManager.Estacao.Primavera:
+                    numeroDoMes = "1";
+                    nomeDoMes = "Primavera";
+                    break;
+                case SeasonManager.Estacao.Verao:
+                    numeroDoMes = "2";
+                    nomeDoMes = "Verão";
+                    break;
+                case SeasonManager.Estacao.Outono:
+                    numeroDoMes = "3";
+                    nomeDoMes = "Outono";
+                    break;
+                case SeasonManager.Estacao.Inverno:
+                    numeroDoMes = "4";
+                    nomeDoMes = "Inverno";
+                    break;
+            }
+            dateUITxt.text = $"{diaDoMes:00}/{numeroDoMes:00}";
+            //dateUITxt.text = $"Dia {diaDoMes:00} de {nomeDoMes}";
+        }
+
+        if (temperaturaUITxt != null)
+        {
+            // Formata para mostrar uma casa decimal e o símbolo de graus
+            temperaturaUITxt.text = $"{ClimaManager.instance.temperaturaAtual:F1}°C";
+        }
     }
 
     void UpdateNight()
@@ -83,5 +125,10 @@ public class WorldTimeManager : MonoBehaviour
         {
             isNight = false;
         }
+    }
+
+    public float GetHoraAtual()
+    {
+        return horaAtual;
     }
 }
