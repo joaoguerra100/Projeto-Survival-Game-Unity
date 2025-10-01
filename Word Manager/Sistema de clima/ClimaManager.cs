@@ -6,7 +6,14 @@ public class ClimaManager : MonoBehaviour
     [Header("Referencias")]
     public static ClimaManager instance;
 
+    [Header("Referências de Céu")]
+    public Material ceuMaterial;
+    public ParticleSystem camadaDeNuvens;
+    private ParticleSystem.EmissionModule nuvensEmission;
+    private ParticleSystem.MainModule nuvensMain;
+
     #region Variaveis De Chuva
+
     [Header("Referências de Clima Chuva")]
     public GameObject rainEffectObject;
     public ParticleSystem rainParticleSystem;
@@ -19,18 +26,18 @@ public class ClimaManager : MonoBehaviour
     private Coroutine transicaoChuvaCoroutine;
 
     [Header("Probabilidades de Chuva Primavera")]
-    [Range(0, 100)] public int chanceChuvaFracaPrimavera = 25;
-    [Range(0, 100)] public int chanceChuvaMediaPrimavera = 10;
+    [Range(0, 100)] public int chanceChuvaFracaPrimavera = 30;
+    [Range(0, 100)] public int chanceChuvaMediaPrimavera = 15;
     [Range(0, 100)] public int chanceChuvaFortePrimavera = 5;
 
     [Header("Probabilidades de Chuva Verao")]
     [Range(0, 100)] public int chanceChuvaFracaVerao = 10;
-    [Range(0, 100)] public int chanceChuvaMediaVerao = 5;
+    [Range(0, 100)] public int chanceChuvaMediaVerao = 2;
     [Range(0, 100)] public int chanceChuvaForteVerao = 1;
     [Header("Probabilidades de Chuva Outono")]// Estaçao de chuva
-    [Range(0, 100)] public int chanceChuvaFracaOutono = 40;
-    [Range(0, 100)] public int chanceChuvaMediaOutono = 30;
-    [Range(0, 100)] public int chanceChuvaForteOutono = 20;
+    [Range(0, 100)] public int chanceChuvaFracaOutono = 35;
+    [Range(0, 100)] public int chanceChuvaMediaOutono = 25;
+    [Range(0, 100)] public int chanceChuvaForteOutono = 15;
 
     [Header("Configuraçoes da chuva")]
     private bool chovendoNesteMomento;
@@ -38,9 +45,8 @@ public class ClimaManager : MonoBehaviour
     private float horaFimChuva;
 
     [Header("Tempestade")]
-    public Light luzDirecional;
-    [SerializeField] private float minTempoEntreRaios = 5f;
-    [SerializeField] private float maxTempoEntreRaios = 15f;
+    [SerializeField] private float minTempoEntreRaios = 8f;
+    [SerializeField] private float maxTempoEntreRaios = 25f;
     private Coroutine tempestadeCoroutine;
     #endregion
 
@@ -62,7 +68,7 @@ public class ClimaManager : MonoBehaviour
 
     [Header("Probabilidades de Neve Inverno")]
     [Range(0, 100)] public int chanceNeveFracaInverno = 40;
-    [Range(0, 100)] public int chanceNeveMediaInverno = 25;
+    [Range(0, 100)] public int chanceNeveMediaInverno = 20;
     [Range(0, 100)] public int chanceNeveForteInverno = 10;
 
     [Header("Configuraçoes da neve")]
@@ -74,19 +80,37 @@ public class ClimaManager : MonoBehaviour
     #endregion
 
     #region Variaveis De Temperatura
+
     [Header("Temperatura")]
     public float temperaturaAtual;
 
     [Header("Temperaturas Base por Estação")]
-    [SerializeField] private float temperaturaBasePrimavera = 18f;
-    [SerializeField] private float temperaturaBaseVerao = 30f;
-    [SerializeField] private float temperaturaBaseOutono = 15f;
-    [SerializeField] private float temperaturaBaseInverno = -2f;
+    [SerializeField] private float temperaturaBasePrimavera = 16f;
+    [SerializeField] private float temperaturaBaseVerao = 28f;
+    [SerializeField] private float temperaturaBaseOutono = 12f;
+    [SerializeField] private float temperaturaBaseInverno = -5f;
 
     [Header("Modificadores")]
     [SerializeField] private AnimationCurve modificadorTemperaturaPorHora;
-    [SerializeField] private float modificadorChuva = -5f;
-    [SerializeField] private float modificadorNeve = -8f;
+    [SerializeField] private float modificadorChuva = -6f;
+    [SerializeField] private float modificadorNeve = -10f;
+
+    #endregion
+
+    #region Variaveis de Vento
+
+    [Header("Referencias de Vento")]
+    public WindZone ventoGlobal;
+
+    [Header("Força Base do Vento por Estação")]
+    [Range(0f, 2f)] public float forcaVentoPrimavera = 0.6f;
+    [Range(0f, 2f)] public float forcaVentoVerao = 0.2f; // verao com brisa leve
+    [Range(0f, 2f)] public float forcaVentoOutono = 0.8f;
+    [Range(0f, 2f)] public float forcaVentoInverno = 1.2f; // Inverno venta mais
+
+    [Header("Força Extra durante tempestades")]
+    [Range(0f, 5f)] public float forcaExtraTempestade = 3f; // Valor a ser somado durante chuva/neve forte
+    [Range(0f, 5f)] public float turbulenciaExtraTempestade = 2.5f;
 
     #endregion
 
@@ -120,6 +144,11 @@ public class ClimaManager : MonoBehaviour
             snowVelocity = snowParticleSystem.velocityOverLifetime;
             snowParticleSystem.Stop();
         }
+        if (camadaDeNuvens != null)
+        {
+            nuvensEmission = camadaDeNuvens.emission;
+            nuvensMain = camadaDeNuvens.main;
+        }
         DeterminarClimaDoDia(); // Determina o clima para o primeiro dia do jogo
     }
 
@@ -128,6 +157,7 @@ public class ClimaManager : MonoBehaviour
         VerificaChuva();
         VeririficaNeve();
         CalcularTemperaturaAtual();
+        CalcularVentoAtual();
     }
 
     #endregion
@@ -283,6 +313,23 @@ public class ClimaManager : MonoBehaviour
 
         RainIntensity targetIntensity = (RainIntensity)targetIntensityEnum;
 
+        Color corCeuAlvo = new Color(0.53f, 0.84f, 1f); // Cor de céu azul padrão
+        float exposicaoAlvo = 1.3f; // Exposição padrão
+        int emissaoNuvensAlvo = 5;
+        Color corNuvensAlvo = new Color(0.59f, 0.6f, 0.6f); //#979898
+
+        if (targetIntensity != RainIntensity.SemChuva)
+        {
+            // Se for chover, deixa o céu cinza e escuro
+            corCeuAlvo = new Color(0.27f, 0.31f, 0.35f);
+            exposicaoAlvo = 0.2f;
+            emissaoNuvensAlvo = 50;
+            corNuvensAlvo = new Color(0.31f, 0.33f, 0.37f);
+        }
+        // Inicia a nova coroutine para fazer a transição do céu
+        StartCoroutine(TransicaoDeCeuCoroutine(corCeuAlvo, exposicaoAlvo, 8f));
+        StartCoroutine(TransicaoDeNuvensCoroutine(emissaoNuvensAlvo, corNuvensAlvo, 8f));
+
         float targetRate = 0;
         float targetLengthScale = 0;
         float targetSpeedMin = 0, targetSpeedMax = 0;
@@ -295,7 +342,6 @@ public class ClimaManager : MonoBehaviour
             // O caso SemChuva não muda
             case RainIntensity.SemChuva:
                 targetRate = 0; targetLengthScale = 0; targetSpeedMin = 0; targetSpeedMax = 0;
-
                 break;
             // Os outros casos agora definem um range de velocidade
             case RainIntensity.Fraca:
@@ -362,9 +408,8 @@ public class ClimaManager : MonoBehaviour
             rainEmission.rateOverTime = Mathf.Lerp(startRate, targetRate, t);
             rainRenderer.lengthScale = Mathf.Lerp(startLengthScale, targetLengthScale, t);
 
-            // --- ESTA É A CORREÇÃO PRINCIPAL DO ERRO ---
             var vel = rainVelocity; // Pega uma cópia do módulo
-                                    // Interpola o valor mínimo e máximo
+            // Interpola o valor mínimo e máximo
             float newMin = Mathf.Lerp(startSpeedMin, targetSpeedMin, t);
             float newMax = Mathf.Lerp(startSpeedMax, targetSpeedMax, t);
             // ATRIBUI UMA NOVA CURVA MIN/MAX COM OS VALORES ATUALIZADOS
@@ -387,6 +432,57 @@ public class ClimaManager : MonoBehaviour
             rainParticleSystem.Stop();
             if (splashParticleSystem != null) splashParticleSystem.Stop();
         }
+    }
+
+    private IEnumerator TransicaoDeCeuCoroutine(Color corAlvo, float exposicaoAlvo, float duracao)
+    {
+        if (ceuMaterial == null) yield break;
+
+        float tempo = 0;
+        Color corInicial = ceuMaterial.GetColor("_SkyTint");
+        float exposicaoInicial = ceuMaterial.GetFloat("_Exposure");
+
+        while (tempo < duracao)
+        {
+            // Interpola a cor e a exposição ao longo do tempo
+            ceuMaterial.SetColor("_SkyTint", Color.Lerp(corInicial, corAlvo, tempo / duracao));
+            ceuMaterial.SetFloat("_Exposure", Mathf.Lerp(exposicaoInicial, exposicaoAlvo, tempo / duracao));
+
+            tempo += Time.deltaTime;
+            yield return null;
+        }
+
+        // Garante os valores finais
+        ceuMaterial.SetColor("_SkyTint", corAlvo);
+        ceuMaterial.SetFloat("_Exposure", exposicaoAlvo);
+    }
+
+    IEnumerator TransicaoDeNuvensCoroutine(int emissaoAlvo, Color corAlvo, float duracao)
+    {
+        if (camadaDeNuvens == null) yield break;
+
+        float tempo = 0;
+        float emissaoInicial = nuvensEmission.rateOverTime.constant;
+        Color corInicial = nuvensMain.startColor.color;
+
+        while (tempo < duracao)
+        {
+            float t = tempo / duracao;
+            // Interpola a taxa de emissão (quantidade de nuvens)
+            nuvensEmission.rateOverTime = Mathf.Lerp(emissaoInicial, emissaoAlvo, t);
+
+            // Interpola a cor das nuvens
+            var main = camadaDeNuvens.main;
+            main.startColor = Color.Lerp(corInicial, corAlvo, t);
+
+            tempo += Time.deltaTime;
+            yield return null;
+        }
+
+        // Garante os valores finais
+        nuvensEmission.rateOverTime = emissaoAlvo;
+        var finalMain = camadaDeNuvens.main;
+        finalMain.startColor = corAlvo;
     }
 
     #endregion
@@ -422,16 +518,16 @@ public class ClimaManager : MonoBehaviour
 
     IEnumerator EfeitoDeRaio()
     {
-        float intensidadeOriginal = luzDirecional.intensity;
+        float intensidadeOriginal = WorldTimeManager.instance.diretionalLight.intensity;
         float duracaoDoClarao = Random.Range(0.1f, 0.25f);
 
         // Aumenta a intensidade da luz para simular o clarão
-        luzDirecional.intensity = intensidadeOriginal * 5f; // 5x mais forte
+        WorldTimeManager.instance.diretionalLight.intensity = intensidadeOriginal * 5f; // 5x mais forte
 
         yield return new WaitForSeconds(duracaoDoClarao);
 
         // Volta a intensidade ao normal
-        luzDirecional.intensity = intensidadeOriginal;
+        WorldTimeManager.instance.diretionalLight.intensity = intensidadeOriginal;
     }
 
     #endregion
@@ -571,5 +667,47 @@ public class ClimaManager : MonoBehaviour
 
         temperaturaAtual = tempBase + modificadorHora + modificadorClima;
     }
+    #endregion
+
+    #region Vento
+
+    void CalcularVentoAtual()
+    {
+        if (ventoGlobal == null) return;
+
+        // 1 Define uma força e turbulencia base com base na estaçao
+        float forcaAlvo = 0f;
+        float turbulenciaAlvo = 0.5f; // Uma turbulência base para o vento não ser tão reto
+
+        SeasonManager.Estacao estacao = SeasonManager.instance.estacaoAtual;
+        switch (estacao)
+        {
+            case SeasonManager.Estacao.Primavera:
+                forcaAlvo = forcaVentoPrimavera;
+                break;
+            case SeasonManager.Estacao.Verao:
+                forcaAlvo = forcaVentoVerao;
+                break;
+            case SeasonManager.Estacao.Outono:
+                forcaAlvo = forcaVentoOutono;
+                break;
+            case SeasonManager.Estacao.Inverno:
+                forcaAlvo = forcaVentoInverno;
+                break;
+        }
+
+        // 2 verifica se ha uma tempestade apara adicionar força e turbulencia estra
+        if (intensidadeAtualDaChuva == RainIntensity.Forte || intensidadeAtualDaNeve == NeveIntensidade.Forte)
+        {
+            forcaAlvo += forcaExtraTempestade;
+            turbulenciaAlvo += turbulenciaExtraTempestade;
+        }
+
+        // 3. Aplica os valores suavemente ao Wind Zone para evitar mudanças bruscas
+        // Usamos Lerp para que o vento aumente e diminua gradualmente
+        ventoGlobal.windMain = Mathf.Lerp(ventoGlobal.windMain, forcaAlvo, Time.deltaTime * 0.5f);
+        ventoGlobal.windTurbulence = Mathf.Lerp(ventoGlobal.windTurbulence, turbulenciaAlvo, Time.deltaTime * 0.5f);
+    }
+
     #endregion
 }

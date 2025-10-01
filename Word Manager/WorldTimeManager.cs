@@ -18,7 +18,7 @@ public class WorldTimeManager : MonoBehaviour
     public TextMeshProUGUI temperaturaUITxt;
     [Header("Configuraçoes de tempo")]
     [Range(0f, 24f)][SerializeField] private float horaAtual;
-    [SerializeField] private float duracaoDoDiaEmMinutos;
+    [SerializeField] private float duracaoDoDiaEmMinutos = 40f;
 
     [Header("Boolenas de ajuda")]
     public bool tempoParado;
@@ -81,37 +81,35 @@ public class WorldTimeManager : MonoBehaviour
         if (dateUITxt != null && SeasonManager.instance != null)
         {
             int diaDoMes = SeasonManager.instance.diaAtualDaEstacao;
-            SeasonManager.Estacao estacaoAtual = SeasonManager.instance.estacaoAtual;
+            int numeroDoMes = (int)SeasonManager.instance.estacaoAtual + 1;
 
-            string numeroDoMes = "";
-            string nomeDoMes = "";
-            switch (estacaoAtual)
+            // Verifica a configuração salva no SettingsManager
+            if (SettingsManager.instance.currentDateFormat == SettingsManager.DateFormat.DiaMes)
             {
-                case SeasonManager.Estacao.Primavera:
-                    numeroDoMes = "1";
-                    nomeDoMes = "Primavera";
-                    break;
-                case SeasonManager.Estacao.Verao:
-                    numeroDoMes = "2";
-                    nomeDoMes = "Verão";
-                    break;
-                case SeasonManager.Estacao.Outono:
-                    numeroDoMes = "3";
-                    nomeDoMes = "Outono";
-                    break;
-                case SeasonManager.Estacao.Inverno:
-                    numeroDoMes = "4";
-                    nomeDoMes = "Inverno";
-                    break;
+                dateUITxt.text = $"{diaDoMes:00}/{numeroDoMes:00}"; // Formato: 01/03
             }
-            dateUITxt.text = $"{diaDoMes:00}/{numeroDoMes:00}";
-            //dateUITxt.text = $"Dia {diaDoMes:00} de {nomeDoMes}";
+            else // Se for MesDia
+            {
+                dateUITxt.text = $"{numeroDoMes:00}/{diaDoMes:00}"; // Formato: 03/01
+            }
         }
 
-        if (temperaturaUITxt != null)
+        if (temperaturaUITxt != null && ClimaManager.instance != null)
         {
-            // Formata para mostrar uma casa decimal e o símbolo de graus
-            temperaturaUITxt.text = $"{ClimaManager.instance.temperaturaAtual:F1}°C";
+            // Pega a temperatura atual, que está sempre em Celsius no ClimaManager
+            float celsius = ClimaManager.instance.temperaturaAtual;
+            
+            // Verifica a configuração salva no SettingsManager
+            if (SettingsManager.instance.currentTempUnit == SettingsManager.TempUnit.Celsius)
+            {
+                temperaturaUITxt.text = $"{celsius:F1}°C"; // Exibe em Celsius
+            }
+            else // Se for Fahrenheit
+            {
+                // Converte Celsius para Fahrenheit
+                float fahrenheit = (celsius * 9 / 5f) + 32;
+                temperaturaUITxt.text = $"{fahrenheit:F1}°F"; // Exibe em Fahrenheit
+            }
         }
     }
 

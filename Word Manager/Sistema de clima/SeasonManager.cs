@@ -14,16 +14,16 @@ public class SeasonManager : MonoBehaviour
 
     [Header("Configuração das Estações")]
     public Estacao estacaoAtual;
-    [SerializeField] private int diasPorEstacao = 10;
+    [SerializeField] private int diasPorEstacao = 15;
 
     [Header("Contadores")]
     public int diaAtualDoAno = 1;
     public int diaAtualDaEstacao = 1;
 
     [Header("Configuração do Vento por Estação")]
-    [Range(0f, 1f)] public float volumeVentoPrimavera = 0.6f;
+    [Range(0f, 1f)] public float volumeVentoPrimavera = 0.5f;
     [Range(0f, 1f)] public float volumeVentoVerao = 0.2f;
-    [Range(0f, 1f)] public float volumeVentoOutono = 0.4f;
+    [Range(0f, 1f)] public float volumeVentoOutono = 0.6f;
     [Range(0f, 1f)] public float volumeVentoInverno = 0.8f; // Mais vento no inverno
 
     void Awake()
