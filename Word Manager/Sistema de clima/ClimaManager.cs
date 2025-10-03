@@ -40,7 +40,7 @@ public class ClimaManager : MonoBehaviour
     [Range(0, 100)] public int chanceChuvaForteOutono = 15;
 
     [Header("Configuraçoes da chuva")]
-    private bool chovendoNesteMomento;
+    public bool chovendoNesteMomento { get; private set; }
     private float horaInicioChuva;
     private float horaFimChuva;
 
@@ -51,6 +51,7 @@ public class ClimaManager : MonoBehaviour
     #endregion
 
     #region Variaveis De Neve
+
     [Header("Referencias de Clima de Neve")]
     public ParticleSystem snowParticleSystem;
     private ParticleSystem.EmissionModule snowEmission;
@@ -72,7 +73,7 @@ public class ClimaManager : MonoBehaviour
     [Range(0, 100)] public int chanceNeveForteInverno = 10;
 
     [Header("Configuraçoes da neve")]
-    private bool nevandoNesteMomento;
+    public bool nevandoNesteMomento { get; private set; }
     private float horaInicioNeve;
     private float horaFimNeve;
     private Coroutine transicaoNeveCoroutine;
@@ -664,7 +665,7 @@ public class ClimaManager : MonoBehaviour
         {
             modificadorClima = modificadorNeve;
         }
-
+    
         temperaturaAtual = tempBase + modificadorHora + modificadorClima;
     }
     #endregion
