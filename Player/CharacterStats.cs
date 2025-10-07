@@ -1,9 +1,12 @@
 using System;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 
 public class CharacterStats : MonoBehaviour
 {
-    #region Variaveis
+    #region Variaveis De Status
 
     [Header("Vida")]
     public float vidaMaxima;
@@ -71,6 +74,10 @@ public class CharacterStats : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Variaveis de Clima
+
     [Header("Debufs")]
     public bool sangrando;
     public bool pernaQuebrada;
@@ -80,8 +87,6 @@ public class CharacterStats : MonoBehaviour
     [SerializeField] private float temperaturaCorporal = 37f;
 
     [Header("Configurações de Sobrevivência")]
-    [SerializeField] private float temperaturaCriticaFrio = 35f;
-    [SerializeField] private float temperaturaCriticaCalor = 40f;
     [SerializeField] private float zonaDeConfortoMin = 18f;
     [SerializeField] private float zonaDeConfortoMax = 28f;
     [SerializeField] private float taxaDeMudancaTemperatura = 0.1f;
@@ -90,10 +95,28 @@ public class CharacterStats : MonoBehaviour
     [SerializeField] private float danoPorHipotermia = 0.5f;
     [SerializeField] private float danoPorCalor = 0.5f;
 
+    [Header("Icones")]
+    [SerializeField] private GameObject iconeFrio;
+    [SerializeField] private GameObject iconeCalor;
+    [SerializeField] private GameObject iconeMolhado;
+
     [Header("Boleanas de status")]
     private bool estaAbrigado = false;
     private bool pertoDeFonteDeCalor = false;
     private bool estaNaAgua = false;
+
+    [Header("Controle de Sons de Status")]
+    [HideInInspector] public bool podeTocarSomDeFrio = true;
+    [HideInInspector] public bool podeTocarSomDeCalor = true;
+
+    [Header("PosProcessamento")]
+    private LensDistortion lensDistortion;
+    private ChromaticAberration chromaticAberration;
+
+    [Header("Efeitos Visuais")]
+    [SerializeField] private Image statusOverlayImage;
+    [SerializeField] private float fadeSpeed = 3f;
+
     #endregion
 
     #region Actions
@@ -122,16 +145,29 @@ public class CharacterStats : MonoBehaviour
         OnEstaminaMudou?.Invoke(_estaminaAtual, estaminaMax);
         OnFomeMudou?.Invoke(_fomeAtual, fomeMaxima);
         OnSedeMudou?.Invoke(_sedeAtual, sedeMaxima);
+        iconeCalor.SetActive(false);
+        iconeFrio.SetActive(false);
+        iconeMolhado.SetActive(false);
+
+        if (ClimaManager.instance != null && ClimaManager.instance.volumeGlobal != null)
+        {
+            VolumeProfile profile = ClimaManager.instance.volumeGlobal.profile;
+            profile.TryGet(out lensDistortion);
+            profile.TryGet(out chromaticAberration);
+        }
     }
 
 
     void Update()
     {
         if (PauseController.instance.pause == true | Player.instance.morte == true) { return; }
+        GerenciarStatusDoClima();
         GerenciarEstamina();
         AplicarPenalidadesDeStatus();
         AplicarPenalidadesMovimento();
-        GerenciarStatusDoClima();
+
+        GerenciarEfeitosPosProcessamento();
+        GerenciarStatusOverlay();
     }
 
     #endregion
@@ -384,7 +420,7 @@ public class CharacterStats : MonoBehaviour
         // Limita a temperatura a valores fisiológicos.
         temperaturaCorporal = Mathf.Clamp(temperaturaCorporal, 32f, 42f);
 
-
+        GerenciarIcones();
         //APLICAÇÃO DOS DEBUFFS
         DebuffsCalor();
         DebuffsFrio();
@@ -395,47 +431,155 @@ public class CharacterStats : MonoBehaviour
         if (temperaturaCorporal >= 42f)
         {
             // NÍVEL 3: CRÍTICO (Dano na vida)
-            float severidade = (temperaturaCorporal - temperaturaCriticaCalor);
+            float severidade = temperaturaCorporal - 42f;
             vidaAtual -= danoPorCalor * severidade * Time.deltaTime;
-            Debug.Log("Hipertermia CRÍTICA! Perdendo vida!");
+            TocarSomDeStatus("Calor");
+            if (iconeCalor != null) iconeCalor.SetActive(true);
         }
-        else if (temperaturaCorporal > temperaturaCriticaCalor) // Acima de 40°C
+        else if (temperaturaCorporal > 40f) // Acima de 40°C
         {
             // NÍVEL 2: PERIGOSO (Perde sede e fome)
-            float severidade = (temperaturaCorporal - temperaturaCriticaCalor);
+            float severidade = temperaturaCorporal - 40f;
             sedeAtual -= 5f * severidade * Time.deltaTime;
-            fomeAtual -= 1f * severidade * Time.deltaTime; // Perder fome é mais lento
-            Debug.Log("Hipertermia! Sede e fome diminuindo rapidamente!");
+            fomeAtual -= 1f * severidade * Time.deltaTime;
+            TocarSomDeStatus("Calor");
+            if (iconeCalor != null) iconeCalor.SetActive(true);
         }
         else if (temperaturaCorporal > 38f) // Acima de 38°C
         {
             // NÍVEL 1: ALERTA (Apenas um aviso)
-            // Aqui você pode ativar um ícone de "calor" na tela
-            Debug.Log("Alerta: Calor excessivo!");
+            if (iconeCalor != null) iconeCalor.SetActive(true);
+            //Debug.Log("Alerta: Calor excessivo!");
+        }
+        else
+        {
+            podeTocarSomDeCalor = true;
         }
     }
     void DebuffsFrio()
     {
-        if (temperaturaCorporal < temperaturaCriticaFrio) // Abaixo de 35°C
+        if (temperaturaCorporal < 33f)
         {
-            // NÍVEL 3: CRÍTICO (Dano na vida)
-            float severidade = (temperaturaCriticaFrio - temperaturaCorporal);
+            float severidade = 33f - temperaturaCorporal;
             vidaAtual -= danoPorHipotermia * severidade * Time.deltaTime;
-            fomeAtual -= 2f * severidade * Time.deltaTime;
-            Debug.Log("Hipotermia CRÍTICA! Perdendo vida!");
+            fomeAtual -= 1.2f * severidade * Time.deltaTime;
+            TocarSomDeStatus("Frio");
+            if (iconeFrio != null) iconeFrio.SetActive(true);
         }
-        else if (temperaturaCorporal < 36f) // Abaixo de 36°C
+        else if (temperaturaCorporal < 35f)
         {
-            // NÍVEL 2: PERIGOSO (Penalidade na estamina)
-            multiplicadorRegenStamina *= 0.3f; // Regeneração de estamina é reduzida a 30% do normal
-            Debug.Log("Hipotermia! Regeneração de estamina reduzida!");
+            multiplicadorRegenStamina *= 0.3f;
+            TocarSomDeStatus("Frio");
+            if (iconeFrio != null) iconeFrio.SetActive(true);
         }
-        else if (temperaturaCorporal < 36.5f) // Abaixo de 36.5°C
+        else if (temperaturaCorporal < 36.5f)
         {
-            // NÍVEL 1: ALERTA (Apenas um aviso)
-            // Aqui você pode ativar um ícone de "frio" na tela
-            Debug.Log("Alerta: Começando a sentir frio!");
+            multiplicadorRegenStamina *= 0.7f;
+            TocarSomDeStatus("Frio");
+            if (iconeFrio != null) iconeFrio.SetActive(true);
         }
+        else
+        {
+            podeTocarSomDeFrio = true;
+        }
+    }
+
+    void GerenciarIcones()
+    {
+        if (iconeCalor != null) iconeCalor.SetActive(false);
+        if (iconeFrio != null) iconeFrio.SetActive(false);
+
+        if (iconeMolhado != null)
+        {
+            iconeMolhado.SetActive(nivelDeUmidade > 30f);
+        }
+    }
+
+    void TocarSomDeStatus(string tipo)
+    {
+        if (tipo == "Frio" && podeTocarSomDeFrio)
+        {
+            StartCoroutine(AudioManager.instance.TocarSomFrioComDelay());
+            podeTocarSomDeFrio = false; // Impede que o som toque de novo imediatamente
+        }
+        else if (tipo == "Calor" && podeTocarSomDeCalor)
+        {
+            StartCoroutine(AudioManager.instance.TocarSomCalorComDelay());
+            podeTocarSomDeCalor = false;
+        }
+    }
+
+    #endregion
+
+    #region Gerenciamento de efeitos
+
+    void GerenciarEfeitosPosProcessamento()
+    {
+        if (lensDistortion == null || chromaticAberration == null) return;
+
+        float distortionAlvo = 0f;
+        float chromaticAlvo = 0f;
+
+        // Logica de calor
+        if (temperaturaCorporal > 39f)
+        {
+            // Mapeia a temperatura de 39°C (sem efeito) para 42°C (efeito máximo)
+            float intensidaCalor = 1 - ((temperaturaCorporal - 39f) / (42f - 39f));
+            intensidaCalor = Mathf.Clamp01(intensidaCalor);
+
+            distortionAlvo = intensidaCalor * -0.3f;
+            chromaticAlvo = intensidaCalor * 0.4f;
+        }
+        // APLICAÇÃO SUAVE DOS VALORES
+        // Usamos Lerp para que os efeitos apareçam e desapareçam gradualmente, não de forma instantânea.
+        float velocidadeDeTransicao = Time.deltaTime * 2f;
+        lensDistortion.intensity.value = Mathf.Lerp(lensDistortion.intensity.value, distortionAlvo, velocidadeDeTransicao);
+        chromaticAberration.intensity.value = Mathf.Lerp(chromaticAberration.intensity.value, chromaticAlvo, velocidadeDeTransicao);
+    }
+
+    void GerenciarStatusOverlay()
+    {
+        if (statusOverlayImage == null) return;
+
+        Color targetColor = Color.clear;
+        float targetAlpha = 0f;
+
+        // Logica de calor
+        if (temperaturaCorporal > 38f)
+        {
+            float intensidade = 0f;
+            if (temperaturaCorporal >= 42f) intensidade = 1f;
+            else if (temperaturaCorporal > 40f) intensidade = (temperaturaCorporal - 40f) / 2f;
+            else intensidade = (temperaturaCorporal - 38f) / 2f;
+
+            targetColor = Color.Lerp(new Color(1f, 0.5f, 0f), Color.red, intensidade); // Laranja para Vermelho
+            targetAlpha = intensidade * 0.3f; // Alpha máximo de 30% para calor
+        }
+        // Logica de Frio
+        if (temperaturaCorporal < 36.5f)
+        {
+            float intensidade = 0f;
+            if (temperaturaCorporal >= 33f) intensidade = 1f;
+            else if (temperaturaCorporal > 35f) intensidade = (35f - temperaturaCorporal) / 2f;
+            else intensidade = (36.5f - temperaturaCorporal) / 1.5f;
+
+            targetColor = Color.Lerp(new Color(0.5f, 0.7f, 1f), Color.blue, intensidade); // Azul claro para Azul escuro
+            targetAlpha = intensidade * 0.3f; // Alpha máximo de 30% para frio
+        }
+        // Logica de pouca vida
+        // Se a vida estiver muito baixa, sobrescreve o resto com vermelho intenso
+        if (vidaAtual < vidaMaxima * 0.25f) // Abxaido de 25% de vida
+        {
+            float intensidadeDano = 1 - (vidaAtual / (vidaMaxima * 0.25f));
+            targetColor = Color.Lerp(Color.red, new Color(0.5f, 0f, 0f), intensidadeDano); // Vermelho para Vermelho Escuro
+            targetAlpha = Mathf.Lerp(0.2f, 0.6f, intensidadeDano); // Alpha de 20% a 60%
+        }
+        // APLICAÇÃO SUAVE NO OVERLAY
+        statusOverlayImage.color = Color.Lerp(statusOverlayImage.color, targetColor, Time.deltaTime * fadeSpeed);
+        // O Alpha é controlado pela cor, então apenas defina o targetAlpha
+        Color currentColor = statusOverlayImage.color;
+        currentColor.a = Mathf.Lerp(currentColor.a, targetAlpha, Time.deltaTime * fadeSpeed);
+        statusOverlayImage.color = currentColor;
     }
 
     #endregion
@@ -446,23 +590,19 @@ public class CharacterStats : MonoBehaviour
         if (other.CompareTag("Abrigo"))
         {
             estaAbrigado = true;
-            Debug.Log("Jogador entrou em um abrigo.");
+            AudioManager.instance.TransicaoParaAmbiente(true);
         }
         if (other.CompareTag("FonteDeCalor"))
         {
             pertoDeFonteDeCalor = true;
-            Debug.Log("Perto de uma fornte de calor");
         }
         if (other.CompareTag("Agua"))
         {
-            nivelDeUmidade = 100f;
             estaNaAgua = true;
-            Debug.Log("Dentro da água! Nível de umidade: 100%");
         }
         if (other.CompareTag("Fogo"))
         {
             vidaAtual -= 0.5f * Time.deltaTime;
-            Debug.Log("Pisou no fogo");
         }
     }
 
@@ -471,21 +611,15 @@ public class CharacterStats : MonoBehaviour
         if (other.CompareTag("Abrigo"))
         {
             estaAbrigado = false;
-            Debug.Log("Jogador saoi do abrigo.");
+            AudioManager.instance.TransicaoParaAmbiente(false);
         }
         if (other.CompareTag("FonteDeCalor"))
         {
             pertoDeFonteDeCalor = false;
-            Debug.Log("saiu de uma fonte de calor");
         }
         if (other.CompareTag("Agua"))
         {
             estaNaAgua = false;
-            Debug.Log("Saiu da agua");
-        }
-        if (other.CompareTag("Fogo"))
-        {
-            Debug.Log("Saiu do fogo");
         }
     }
 
@@ -495,9 +629,37 @@ public class CharacterStats : MonoBehaviour
         {
             float danoPorSegundo = 25f;
             vidaAtual -= danoPorSegundo * Time.deltaTime;
-            Debug.Log("Está se queimando! Vida atual: " + vidaAtual);
+        }
+        if (other.CompareTag("Agua"))
+        {
+            nivelDeUmidade += 20f * Time.deltaTime;
         }
     }
+
+    #endregion
+
+    #region Metodos de ajuda
+
+    public float GetTemperaturaCorporal()
+    {
+        return temperaturaCorporal;
+    }
+
+    public void SetTemperaturaCorporal(float valor)
+    {
+        temperaturaCorporal = valor;
+    }
+
+    public float GetNivelDeUmidade()
+    {
+        return nivelDeUmidade;
+    }
+
+    public void SetNivelDeUmidade(float valor)
+    {
+        nivelDeUmidade = valor;
+    }
+
 
     #endregion
 }

@@ -7,6 +7,9 @@ public class AudioManager : MonoBehaviour
     [Header("Scripts")]
     public static AudioManager instance;
 
+    [Header("Mixers")]
+    public AudioMixer masterMixer;
+
     #region Variaveis Sons Ambiente
 
     [Header("Controladores de Ambiente")]
@@ -28,6 +31,8 @@ public class AudioManager : MonoBehaviour
     private Coroutine rajadasCoroutine;
 
     #endregion
+
+    #region Variaveis
 
     [Header("ControladoresHud")]
     public AudioSource sourceFxHud;
@@ -54,6 +59,9 @@ public class AudioManager : MonoBehaviour
     public AudioClip fxVozMorte;
     public AudioClip fxVozDanos;
     public AudioClip fxVozPulo;
+    public AudioClip[] fxVozFrio; //0 tosse , 1 arrepio
+    public AudioClip fxVozCalor;
+    #endregion
 
     #region Metodos iniciais
 
@@ -100,6 +108,30 @@ public class AudioManager : MonoBehaviour
     {
         somFxVozes.clip = fxVoz;
         somFxVozes.PlayOneShot(fxVoz);
+    }
+
+    public IEnumerator TocarSomFrioComDelay()
+    {
+        // Toca um som de frio aleatório imediatamente
+        if (fxVozFrio.Length > 0 && !somFxVozes.isPlaying)
+        {
+            AudioClip somRandomico = fxVozFrio[Random.Range(0, fxVozFrio.Length)];
+            somFxVozes.PlayOneShot(somRandomico);
+        }
+        // Espera um tempo aleatório antes de permitir que o som toque novamente
+        yield return new WaitForSeconds(Random.Range(8f, 15f));
+        // Avisa ao CharacterStats que já pode pedir outro som de frio
+        if (Player.instance != null) Player.instance.stats.podeTocarSomDeFrio = true;
+    }
+
+    public IEnumerator TocarSomCalorComDelay()
+    {
+        if (fxVozCalor != null && !somFxVozes.isPlaying)
+        {
+            somFxVozes.PlayOneShot(fxVozCalor);
+        }
+        yield return new WaitForSeconds(Random.Range(10f, 20f));
+        if (Player.instance != null) Player.instance.stats.podeTocarSomDeCalor = true;
     }
 
     #region Som Ambiente
@@ -176,6 +208,24 @@ public class AudioManager : MonoBehaviour
         int indexAleatorio = Random.Range(0, sonsDeTrovao.Length);
         // Retorna o AudioClip daquela posição
         return sonsDeTrovao[indexAleatorio];
+    }
+
+    public void TransicaoParaAmbiente(bool paraInterior)
+    {
+        if (masterMixer == null) return;
+
+        AudioMixerSnapshot snapshotAlvo = masterMixer.FindSnapshot(paraInterior ? "Interior" : "Exterior");
+
+        if (snapshotAlvo != null)
+        {
+            float tempoDeTransicao = 1.5f;
+            snapshotAlvo.TransitionTo(tempoDeTransicao);
+            //Debug.Log("Transição de áudio para " + snapshotAlvo.name);
+        }
+        else
+        {
+            Debug.LogError("Snapshot não encontrado: " + (paraInterior ? "Interior" : "Exterior"));
+        }
     }
 
     #endregion

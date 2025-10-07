@@ -1,10 +1,12 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ClimaManager : MonoBehaviour
 {
     [Header("Referencias")]
     public static ClimaManager instance;
+    public Volume volumeGlobal;
 
     [Header("Referências de Céu")]
     public Material ceuMaterial;
@@ -171,7 +173,7 @@ public class ClimaManager : MonoBehaviour
         intensidadeAtualDaNeve = NeveIntensidade.SemNeve;
 
         SeasonManager.Estacao estacao = SeasonManager.instance.estacaoAtual;
-        Debug.Log($"Dia {SeasonManager.instance.diaAtualDoAno}, Estação: {estacao}");
+        //Debug.Log($"Dia {SeasonManager.instance.diaAtualDoAno}, Estação: {estacao}");
         //Verifica se a estação é Inverno.
         if (estacao == SeasonManager.Estacao.Inverno)
         {

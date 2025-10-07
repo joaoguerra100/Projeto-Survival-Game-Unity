@@ -202,6 +202,9 @@ public class GameController : MonoBehaviour
         dados.dadosVida = Player.instance.stats.vidaAtual;
         dados.dadosFome = Player.instance.stats.fomeAtual;
         dados.dadosSede = Player.instance.stats.sedeAtual;
+
+        dados.dadosTemperaturaCorporal = Player.instance.stats.GetTemperaturaCorporal();
+        dados.dadosNivelDeUmidade = Player.instance.stats.GetNivelDeUmidade();
     }
     void SaveAudio(Dados dados)
     {
@@ -284,6 +287,9 @@ public class GameController : MonoBehaviour
         Player.instance.stats.vidaAtual = dados.dadosVida;
         Player.instance.stats.fomeAtual = dados.dadosFome;
         Player.instance.stats.sedeAtual = dados.dadosSede;
+
+        Player.instance.stats.SetTemperaturaCorporal(dados.dadosTemperaturaCorporal);
+        Player.instance.stats.SetNivelDeUmidade(dados.dadosNivelDeUmidade);
     }
     void LoadAudio(Dados dados)
     {
@@ -410,6 +416,10 @@ class Dados
     public float dadosVida;
     public float dadosFome;
     public float dadosSede;
+
+    public float dadosTemperaturaCorporal;
+    public float dadosNivelDeUmidade;
+
     public int dadosMunicao;
     public float volumeFx;
     public float volumeMusica;
