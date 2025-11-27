@@ -3,22 +3,31 @@ using UnityEngine;
 
 public class ItemPhisycBehaviorView : MonoBehaviour
 {
-    [SerializeField]private float tempoParaColsiao = 1;
-
+    [SerializeField] private float tempoParaColsiao = 1;
+    private bool jaIniciouParada = false;
     void OnCollisionEnter(Collision collision)
     {
+        if (jaIniciouParada) return;
+
         StartCoroutine(SetItemToPickUp());
     }
 
     IEnumerator SetItemToPickUp() // DEPOIS DE QUANTO TEMPO O ITEM VAI PODER SER PEGO
     {
+        jaIniciouParada = true;
+
         yield return new WaitForSeconds(tempoParaColsiao);
 
-        Destroy(this.gameObject.GetComponentInChildren<Rigidbody>()); // DESTROI O RIGIDBODY DO FILHO DESTE OBJETO
+        Rigidbody rb = gameObject.GetComponent<Rigidbody>();
 
-        this.gameObject.transform.parent.gameObject.GetComponent<SphereCollider>().center = this.gameObject.transform.localPosition; // TRAZ O COLISOR ESFERICO PARA A POSIÇAO AONDE O ITEM CAIR
-
+        if (rb != null)
+        {
+            //Destroy(rb);
+            rb.isKinematic = true;
+        }
+        else
+        {
+            Debug.LogWarning("Não foi encontrado um Rigidbody para destruir.", gameObject);
+        }
     }
-
-    
 }

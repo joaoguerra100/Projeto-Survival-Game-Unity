@@ -41,10 +41,6 @@ public class GameOverController : MonoBehaviour
             Hud.instance.DesativarHud();
             StartCoroutine(IEGameOver());
         }
-        if (Input.GetButtonDown("Horizontal") && travarGameOver)
-        {
-            AudioManager.instance.MetodoSomFxHud(AudioManager.instance.fxBtnMove);
-        }
     }
 
     public void BotaoGameOver()
@@ -57,16 +53,6 @@ public class GameOverController : MonoBehaviour
         yield return new WaitForSeconds(6f);
         painelGameOver.SetActive(true);
         Time.timeScale = 0;
-    }
-
-    public void Confirmar()
-    {
-        AudioManager.instance.MetodoSomFxHud(AudioManager.instance.fxConfirmar);
-    }
-
-    public void Cancelar()
-    {
-        AudioManager.instance.MetodoSomFxHud(AudioManager.instance.fxCancelar);
     }
 
     public void Reiniciar()

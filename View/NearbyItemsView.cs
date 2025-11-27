@@ -22,8 +22,8 @@ public class NearbyItemsView : MonoBehaviour
     [SerializeField] private GameObject complexSlotGroupPrefab;
 
     [Header("Matrix")]
-    [SerializeField]private int maxCollum;
-    [SerializeField]private int maxRow;
+    [SerializeField] private int maxCollum;
+    [SerializeField] private int maxRow;
     public MatrixUtility matrix;
 
     [Header("Boleanas de ajuda")]
@@ -68,14 +68,22 @@ public class NearbyItemsView : MonoBehaviour
 
         Collider[] hits = Physics.OverlapSphere(Player.instance.transform.position, raioDeLoot, lootLayerMask);
 
+        HashSet<string> processados = new HashSet<string>();
+
         foreach (var hit in hits)
         {
             var lootItem = hit.GetComponentInParent<ItemView>();
-            if (lootItem != null && lootItem.inventoryItem != null)
+            if (lootItem != null && lootItem.inventoryItem != null && lootItem.Item != null)
             {
+                if (processados.Contains(lootItem.inventoryItem.instanceID)) continue;
+
                 var freeSpaces = matrix.LookForFreeArea2(lootItem.Item.itemSize.x, lootItem.Item.itemSize.y);
-                matrix.SetItem(freeSpaces, lootItem.Item.Id);
-                itensDropados.Add(lootItem.inventoryItem);
+                if (freeSpaces != null && freeSpaces.Count > 0)
+                {
+                    matrix.SetItem(freeSpaces, lootItem.Item.Id);
+                    itensDropados.Add(lootItem.inventoryItem);
+                    processados.Add(lootItem.inventoryItem.instanceID);
+                }
             }
             else
             {
@@ -91,13 +99,11 @@ public class NearbyItemsView : MonoBehaviour
         BuildCompexSlot(itensDropados);
     }
 
-    void RemoveAllComplexSlot() //FUNCAO DE LIMPEZA DOS SLOTS
+    void RemoveAllComplexSlot()
     {
-        GameObject[] resultComplexSlotGo = GameObject.FindGameObjectsWithTag("ComplexSlotLoot");
-
-        foreach (var item in resultComplexSlotGo)
+        foreach (Transform child in ComplexSlotGroup.transform)
         {
-            Destroy(item);
+            Destroy(child.gameObject);
         }
     }
 
@@ -111,7 +117,7 @@ public class NearbyItemsView : MonoBehaviour
             if (cellList == null || cellList.Count == 0)
             {
                 Debug.LogWarning($"[InventoryView] Nenhuma célula encontrada para o item com ID: {itemData.baseItemData.Id}. Ignorando slot.");
-                return;
+                continue;
             }
 
             // Pega dados do grid
@@ -138,21 +144,24 @@ public class NearbyItemsView : MonoBehaviour
 
             // CRIAÇÃO DO SLOT
             GameObject obj = Instantiate(complexSlotGroupPrefab);
+            obj.SetActive(true);
             obj.transform.SetParent(ComplexSlotGroup.transform, false);
+            obj.transform.localScale = Vector3.one;
+
             var rect = obj.GetComponent<RectTransform>();
             rect.localPosition = localPos;
             rect.sizeDelta = size;
+
             var complexSlot = obj.GetComponent<ComplexSlotView>();
+            complexSlot.Setup(itemData, i, null);
             complexSlot.ItemView = itemData;
             complexSlot.UpdateIcon();
             complexSlot.UpdateText();
 
-            var slotView = obj.GetComponent<ComplexSlotView>();
             i++;
-            slotView.Setup2(itemData, i);
 
-            obj.tag = "ComplexSlotLoot";
-            obj.name = itemData.baseItemData.name + "_Clone";
+            /* obj.tag = "ComplexSlotLoot"; */
+            obj.name = itemData.baseItemData.name + "_LootUI";
         }
     }
 
@@ -164,28 +173,29 @@ public class NearbyItemsView : MonoBehaviour
             //Debug.Log($"Removendo item com ID: {idUnico}");
             itensDropados.Remove(item);
             matrix.ClearItemOnMatrix(item.baseItemData.Id);
+
             var itemViews = FindObjectsByType<ItemView>(FindObjectsSortMode.None);
             foreach (var view in itemViews)
             {
                 if (view.inventoryItem.instanceID == idUnico)
                 {
-                    //Debug.Log($"Destruindo objeto físico do item {idUnico}");
-                    StartCoroutine(DestruirEAtualizar(view));
+                    Destroy(view.gameObject);
                     break;
                 }
             }
+            UpdateAllItems();
             return true;
         }
         return false;
     }
 
-    IEnumerator DestruirEAtualizar(ItemView view)
+    /* IEnumerator DestruirEAtualizar(ItemView view)
     {
         yield return new WaitForEndOfFrame();
         Destroy(view.gameObject);
         yield return null;
         UpdateAllItems();
-    }
+    } */
 
     #region Methods de procura
     List<Vector2> FindCellById(int id)
@@ -201,9 +211,14 @@ public class NearbyItemsView : MonoBehaviour
     #endregion
 
     public void ShowAndHide()
-    { 
+    {
         visiblePanel = !visiblePanel;
-        coletarPainel.SetActive(visiblePanel);
+        if (coletarPainel != null) coletarPainel.SetActive(visiblePanel);
+
+        if (visiblePanel)
+        {
+            AtualizarItensPertos();
+        }
     }
 
     void OnDrawGizmos()
@@ -214,5 +229,5 @@ public class NearbyItemsView : MonoBehaviour
             Gizmos.DrawSphere(Player.instance.transform.position, raioDeLoot);
         }
     }
-    
+
 }

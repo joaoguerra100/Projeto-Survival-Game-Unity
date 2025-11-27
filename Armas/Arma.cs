@@ -8,22 +8,22 @@ public class Arma : MonoBehaviour
 
     [Header("Referencias")]
     public FireWeaponInstance equipedWeapon;
-    public WeaponItemScriptable weaponData; 
+    public WeaponItemScriptable weaponData;
     private Animator anim;
 
     [Header("ModoDeDisparo")]
-    [SerializeField]private GameObject semi_auto;
-    [SerializeField]private GameObject full_auto;
+    [SerializeField] private GameObject semi_auto;
+    [SerializeField] private GameObject full_auto;
 
     [Header("Prefabs")]
     //public GameObject bulletPrefab;
     public GameObject capsulaPrefab;
 
     [Header("Locais de Spawn")]
-    [SerializeField]private Transform shotSpawnSemMirar;
-    [SerializeField]private Transform shotSpawnMirando;
-    [SerializeField]private Transform capsuleEjector;
-    [SerializeField]private Transform muzzleEfectPos;
+    [SerializeField] private Transform shotSpawnSemMirar;
+    [SerializeField] private Transform shotSpawnMirando;
+    [SerializeField] private Transform capsuleEjector;
+    [SerializeField] private Transform muzzleEfectPos;
 
     [Header("Configuraçao Dos Disparos")]
     //[HideInInspector] public float forcadotiro = 700f;
@@ -37,7 +37,7 @@ public class Arma : MonoBehaviour
     public AudioClip reloadFx;
     public AudioClip engatilharFx;
     [SerializeField] private LayerMask layerInimigo;
-    [HideInInspector]public AudioSource audioSourceArma;
+    [HideInInspector] public AudioSource audioSourceArma;
 
     #endregion
 
@@ -255,9 +255,12 @@ public class Arma : MonoBehaviour
                     break;
                 case "Inimigo":
                     ObjectPoolController.instance.SpawnFromPool("Impacto-Inimigo", hit.point, Quaternion.LookRotation(hit.normal));
-                    hit.transform.SendMessage("Danos", weaponData.danoMunicao, SendMessageOptions.DontRequireReceiver);
                     if (hit.collider.TryGetComponent(out BodyPartHitbox hitbox))
                     {
+                        // 1. Manda o "Chefe da Vida" (Health) tomar o dano
+                        hitbox.healthScript.ReceberDano(weaponData.danoMunicao);
+
+                        // 2. Manda a "IA" (Cérebro) tocar a animação de reação
                         hitbox.zumbi.ReceberHit(hitbox.parteDoCorpo);
                     }
                     break;
@@ -373,7 +376,7 @@ public class Arma : MonoBehaviour
                 quantidadeTotal += resultItem.baseItemData.CurrentNumber;
             }
         }
-        
+
         weaponData.municaoParaRecarregar = quantidadeTotal;
     }
 
@@ -381,14 +384,14 @@ public class Arma : MonoBehaviour
 
     #region Efeitos
 
-    void MuzzleEffect( )
+    void MuzzleEffect()
     {
         Camera cam = Camera.main;
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         ObjectPoolController.instance.SpawnFromPool("MuzzleEfect", muzzleEfectPos.position, Quaternion.LookRotation(ray.direction));
     }
 
-    
+
 
     #endregion
 

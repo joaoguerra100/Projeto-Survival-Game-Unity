@@ -15,13 +15,11 @@ public class Porta : MonoBehaviour, InterfaceInteracao
     {
         public float openingSpeed = 1;
         public float closingSpeed = 1.3f;
-        [Range(0, 1)]
-        public float closeStartFrom = 0.6f;
-        public OpenStyle openMethod; //Open by button or automatically?
-        public bool autoClose = false; //Automatically close the door. Forced to true when in AUTOMATIC mode.
+        public OpenStyle openMethod;
+        public bool autoClose = false;
     }
     [Serializable]
-    public class AnimNames //names of the animations, which you use for every action
+    public class AnimNames
     {
         public string OpeningAnim = "Door_open";
         public string LockedAnim = "Door_locked";
@@ -108,17 +106,18 @@ public class Porta : MonoBehaviour, InterfaceInteracao
 
     void Update()
     {
-        if (!doorAnimation.isPlaying && SoundFX.isPlaying) {
-			SoundFX.Stop();
-		}
-		/* if(!inZone)
+        if (!doorAnimation.isPlaying && SoundFX.isPlaying)
+        {
+            SoundFX.Stop();
+        }
+        /* if(!inZone)
 		{
 			HideHint();
 			return;
 		} */
 
-		if(Controls.openMethod == OpenStyle.AUTOMATIC && !Opened)
-			OpenDoor();
+        if (Controls.openMethod == OpenStyle.AUTOMATIC && !Opened)
+            OpenDoor();
 
 
         /* if(!Input.GetKeyDown(Controls.openButton) || Controls.openMethod != OpenStyle.BUTTON)
@@ -187,8 +186,8 @@ public class Porta : MonoBehaviour, InterfaceInteracao
     {
         if (!doorTexts.enabled)
             return;
-        
-       if (TextObj != null)
+
+        if (TextObj != null)
             TextObj.gameObject.SetActive(false);
     }
 
@@ -275,24 +274,24 @@ public class Porta : MonoBehaviour, InterfaceInteracao
     }
     void CloseDoor()
     {
-        if (doorAnimation[AnimationNames.OpeningAnim].normalizedTime < 0.98f && doorAnimation[AnimationNames.OpeningAnim].normalizedTime > 0)
+        // Pega o estado atual da animação
+        var animState = doorAnimation[AnimationNames.OpeningAnim];
+
+        // Se a animação não estiver tocando, ou se já estiver no final (totalmente aberta)
+        if (!doorAnimation.isPlaying || animState.normalizedTime >= 0.9f)
         {
-            doorAnimation[AnimationNames.OpeningAnim].speed = -Controls.closingSpeed;
-            doorAnimation[AnimationNames.OpeningAnim].normalizedTime = doorAnimation[AnimationNames.OpeningAnim].normalizedTime;
-            doorAnimation.Play(AnimationNames.OpeningAnim);
+            // Força o tempo para o final (1.0 = totalmente aberta) para garantir que feche suavemente
+            animState.normalizedTime = 1.0f;
         }
-        else
-        {
-            doorAnimation[AnimationNames.OpeningAnim].speed = -Controls.closingSpeed;
-            doorAnimation[AnimationNames.OpeningAnim].normalizedTime = Controls.closeStartFrom;
-            doorAnimation.Play(AnimationNames.OpeningAnim);
-        }
-        if (doorAnimation[AnimationNames.OpeningAnim].normalizedTime > Controls.closeStartFrom)
-        {
-            doorAnimation[AnimationNames.OpeningAnim].speed = -Controls.closingSpeed;
-            doorAnimation[AnimationNames.OpeningAnim].normalizedTime = Controls.closeStartFrom;
-            doorAnimation.Play(AnimationNames.OpeningAnim);
-        }
+        // SE a porta estiver no meio do caminho abrindo (ex: jogador apertou botão rápido), 
+        // o 'else' implícito aqui é manter o normalizedTime onde ele está, para fechar de onde parou.
+
+        // Define a velocidade negativa para tocar ao contrário
+        animState.speed = -Controls.closingSpeed;
+
+        // Toca a animação
+        doorAnimation.Play(AnimationNames.OpeningAnim);
+
         Opened = false;
 
         if (Controls.openMethod == OpenStyle.BUTTON && !Controls.autoClose)
@@ -381,24 +380,24 @@ public class Porta : MonoBehaviour, InterfaceInteracao
     #region Triggers
 
     void OnTriggerEnter(Collider other)
-	{
-		if(other.tag != playerTag)
-			return;
-		
-		inZone = true;
-	}
-	
-	void OnTriggerExit(Collider other)
-	{
-		if (other.tag != playerTag) 
-			return;
+    {
+        if (other.tag != playerTag)
+            return;
+
+        inZone = true;
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.tag != playerTag)
+            return;
 
 
-		if(Opened && Controls.autoClose)
-			CloseDoor();
-		
-		inZone = false;
-	}
-    
+        if (Opened && Controls.autoClose)
+            CloseDoor();
+
+        inZone = false;
+    }
+
     #endregion
 }

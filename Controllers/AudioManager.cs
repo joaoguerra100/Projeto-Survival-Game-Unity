@@ -15,6 +15,7 @@ public class AudioManager : MonoBehaviour
     [Header("Controladores de Ambiente")]
     public AudioSource sourceAmbiente;
     public AudioSource sourceEfeitosAmbiente;
+    public AudioSource sourceAmbienteDetalhes;
     private Coroutine fadeCoroutine;
 
     [Header("Sons de Chuva")]
@@ -29,6 +30,20 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] sonsVentoLoop;
     public AudioClip[] sonsRajadaDeVento;
     private Coroutine rajadasCoroutine;
+
+    [Header("Controladores de Ambiente Detalhado")]
+    private AudioClip clipAtualAmbienteDetalhes;
+    private Coroutine fadeDetalhesCoroutine;
+
+    [Header("Sons de Ambiente por Estação/Hora")]
+    public AudioClip somPrimaveraDia;
+    public AudioClip somPrimaveraNoite;
+    public AudioClip somVeraoDia;
+    public AudioClip somVeraoNoite;
+    public AudioClip somOutonoDia;
+    public AudioClip somOutonoNoite;
+    public AudioClip somInvernoDia;  // Pode ser um som de vento mais sutil ou silêncio
+    public AudioClip somInvernoNoite; // Silêncio ou vento ainda mais sutil
 
     #endregion
 
@@ -45,9 +60,9 @@ public class AudioManager : MonoBehaviour
     [Header("FxMenu")]
     public AudioClip fxPause;
     public AudioClip[] fxGameOver;
-    public AudioClip fxConfirmar;
+    public AudioClip fxHoverSound;
+    public AudioClip fxClickSound;
     public AudioClip fxCancelar;
-    public AudioClip fxBtnMove;
 
     [Header("FxArmasGenerico")]
     public AudioClip semMunicao;
@@ -85,6 +100,7 @@ public class AudioManager : MonoBehaviour
 
             // Inicia a rotina que vai tocar rajadas de vento aleatórias
             rajadasCoroutine = StartCoroutine(RajadasDeVentoCoroutine());
+            AtualizarSomAmbienteDetalhes();
         }
         DontDestroyOnLoad(this.gameObject);
     }
@@ -226,6 +242,88 @@ public class AudioManager : MonoBehaviour
         {
             Debug.LogError("Snapshot não encontrado: " + (paraInterior ? "Interior" : "Exterior"));
         }
+    }
+
+    public void AtualizarSomAmbienteDetalhes()
+    {
+        if (WorldTimeManager.instance == null || SeasonManager.instance == null) return;
+
+        bool ehNoite = WorldTimeManager.instance.isNight;
+        SeasonManager.Estacao estacao = SeasonManager.instance.estacaoAtual;
+        AudioClip clipAlvo = null;
+
+        // Seleciona o AudioClip correto com base na estação e hora
+        switch (estacao)
+        {
+            case SeasonManager.Estacao.Primavera:
+                clipAlvo = ehNoite ? somPrimaveraNoite : somPrimaveraDia;
+                break;
+            case SeasonManager.Estacao.Verao:
+                clipAlvo = ehNoite ? somVeraoNoite : somVeraoDia;
+                break;
+            case SeasonManager.Estacao.Outono:
+                clipAlvo = ehNoite ? somOutonoNoite : somOutonoDia;
+                break;
+            case SeasonManager.Estacao.Inverno:
+                clipAlvo = ehNoite ? somInvernoNoite : somInvernoDia;
+                break;
+        }
+
+        // Só faz a transição se o som alvo for diferente do que já está tocando
+        if (clipAlvo != clipAtualAmbienteDetalhes && sourceAmbienteDetalhes != null)
+        {
+            // Para a transição anterior, se houver uma
+            if (fadeDetalhesCoroutine != null)
+            {
+                StopCoroutine(fadeDetalhesCoroutine);
+            }
+            // Inicia a nova transição
+            fadeDetalhesCoroutine = StartCoroutine(FadeAmbienteDetalhesCoroutine(clipAlvo));
+        }
+    }
+
+    private IEnumerator FadeAmbienteDetalhesCoroutine(AudioClip clipAlvo)
+    {
+        float fadeDuration = 3.0f; // Duração da transição (ex: 3 segundos)
+        float startVolume = sourceAmbienteDetalhes.volume;
+
+        // 1. Fade out do som atual
+        float timer = 0f;
+        while (timer < fadeDuration / 2)
+        {
+            sourceAmbienteDetalhes.volume = Mathf.Lerp(startVolume, 0f, timer / (fadeDuration / 2));
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        sourceAmbienteDetalhes.volume = 0f;
+        sourceAmbienteDetalhes.Stop();
+
+        // 2. Troca o clipe e começa o fade in
+        clipAtualAmbienteDetalhes = clipAlvo; // Atualiza o clipe atual
+        if (clipAlvo != null)
+        {
+            sourceAmbienteDetalhes.clip = clipAlvo;
+            sourceAmbienteDetalhes.loop = true; // Garante que o som de ambiente toque em loop
+            sourceAmbienteDetalhes.Play();
+
+            // Pega o volume alvo (pode ser ajustado ou vir de configurações)
+            float targetVolume = 1.0f; // Volume padrão para ambiente detalhado
+
+            timer = 0f;
+            while (timer < fadeDuration / 2)
+            {
+                sourceAmbienteDetalhes.volume = Mathf.Lerp(0f, targetVolume, timer / (fadeDuration / 2));
+                timer += Time.deltaTime;
+                yield return null;
+            }
+            sourceAmbienteDetalhes.volume = targetVolume;
+        }
+        else
+        {
+            // Se o clipAlvo for nulo (ex: silêncio no inverno), apenas mantém parado.
+        }
+
+        fadeDetalhesCoroutine = null;
     }
 
     #endregion

@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Audio;
@@ -46,9 +45,6 @@ public class PauseController : MonoBehaviour
     [Header("Opçoes")]
     public Toggle autosave;
 
-    [Header("PostProcessVolume")]
-    private PostProcessVolume postProcessVolume;
-
     #endregion
 
     #region Methods Iniciais
@@ -69,7 +65,6 @@ public class PauseController : MonoBehaviour
         configuracoesPainel.SetActive(false);
         pausePainel.SetActive(false);
         visiblePanel = false;
-        postProcessVolume = FindAnyObjectByType<PostProcessVolume>();
     }
 
     void Update()
@@ -291,10 +286,6 @@ public class PauseController : MonoBehaviour
             {
                 configuracoesPainel.SetActive(false);
             }
-        }
-        if (Input.GetButtonDown("Vertical") && pause)
-        {
-            AudioManager.instance.MetodoSomFxHud(AudioManager.instance.fxBtnMove);
         }
     }
 

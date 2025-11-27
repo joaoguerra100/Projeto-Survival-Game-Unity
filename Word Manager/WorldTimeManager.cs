@@ -11,6 +11,7 @@ public class WorldTimeManager : MonoBehaviour
     public Light diretionalLight;
     public Gradient lightColorOverTime;
     public AnimationCurve lightIntensityOverTime;
+    public Material ceuMaterial;
 
     [Header("Configuraçoes de RelogioTxt")]
     public TextMeshProUGUI clockUITxt;
@@ -23,6 +24,18 @@ public class WorldTimeManager : MonoBehaviour
     [Header("Boolenas de ajuda")]
     public bool tempoParado;
     public bool isNight;
+    private bool eraNoite;
+
+    [Header("Iluminação Noturna (Lua)")]
+    public float intensidadeLuaNova = 0.01f;
+    public float intensidadeLuaCrescente = 0.05f;
+    public float intensidadeLuaMinguante = 0.05f;
+    public float intensidadeLuaCheia = 0.12f;
+
+    [Header("Referências Lua")]
+    public Transform moonTransform;
+    public float skyDistance = 1000f; // Distância da lua em relação ao centro do mundo
+    private Transform cameraTransform;
 
     private float timeMultiplier;
 
@@ -36,6 +49,9 @@ public class WorldTimeManager : MonoBehaviour
     void Start()
     {
         timeMultiplier = 24f / (duracaoDoDiaEmMinutos * 60f); //Calcula quantas horas passam por segundo
+        cameraTransform = Camera.main.transform;
+        UpdateNight();
+        eraNoite = isNight;
     }
 
     void Update()
@@ -57,17 +73,121 @@ public class WorldTimeManager : MonoBehaviour
         }
     }
 
+    #region Controle da luz e tempo
     public void UpdateLighting()
     {
         float timeNormalized = horaAtual / 24f;
+        Quaternion lightRotation = Quaternion.Euler((timeNormalized * 360f) - 90f, 170f, 0);
 
-        //Rotaciona a luza direcional(sol)
-        diretionalLight.transform.rotation = Quaternion.Euler((timeNormalized * 360f) - 90f, 170f, 0);
+        // --- LUZ DIRECIONAL (SOL/LUA) ---
+        diretionalLight.transform.rotation = lightRotation;
+        Color lightColor = lightColorOverTime.Evaluate(timeNormalized);
+        float finalIntensity = lightIntensityOverTime.Evaluate(timeNormalized);
+        diretionalLight.color = lightColor; // Aplica a cor base
 
-        //Ajusta cor e intensidade da luz ao longo do tempo
-        diretionalLight.color = lightColorOverTime.Evaluate(timeNormalized);
-        diretionalLight.intensity = lightIntensityOverTime.Evaluate(timeNormalized);
+        // --- LÓGICA DA LUZ DA LUA ---
+        float intensidadeLuzDaLua = 0f;
+        SeasonManager.FaseDaLua fase = SeasonManager.instance.faseDaLuaAtual;
+        if (isNight && SeasonManager.instance != null)
+        {
+            switch (fase)
+            {
+                case SeasonManager.FaseDaLua.Nova: intensidadeLuzDaLua = intensidadeLuaNova; break;
+                case SeasonManager.FaseDaLua.Crescente: intensidadeLuzDaLua = intensidadeLuaCrescente; break;
+                case SeasonManager.FaseDaLua.Cheia: intensidadeLuzDaLua = intensidadeLuaCheia; break;
+                case SeasonManager.FaseDaLua.Minguante: intensidadeLuzDaLua = intensidadeLuaMinguante; break;
+            }
+            finalIntensity += intensidadeLuzDaLua;
+        }
+        diretionalLight.intensity = finalIntensity;
+
+        //CONTROLE DO MATERIAL DO CÉU (Skybox/Procedural)
+        ControleMaterialCel(timeNormalized);
+
+        // --- CONTROLE DA NEBLINA ---
+        ControleNeblina();
+
+        // --- MOVIMENTO DA LUA FÍSICA ---
+        MovimentoDaLua(lightRotation);
     }
+
+    void ControleMaterialCel(float timeNormalized)
+    {
+        Color lightColor = lightColorOverTime.Evaluate(timeNormalized);
+        SeasonManager.FaseDaLua fase = SeasonManager.instance.faseDaLuaAtual;
+        if (ceuMaterial != null)
+        {
+            if (isNight)
+            {
+                float skyExposure;
+                Color skyTint;
+                switch (fase)
+                {
+                    case SeasonManager.FaseDaLua.Nova:
+                        skyExposure = 0f;
+                        skyTint = Color.black;
+                        break;
+                    case SeasonManager.FaseDaLua.Crescente:
+                    case SeasonManager.FaseDaLua.Minguante:
+                        skyExposure = 0.03f;
+                        skyTint = new Color(0.04f, 0.04f, 0.1f); // Azul bem escuro
+                        break;
+                    case SeasonManager.FaseDaLua.Cheia:
+                    default:
+                        skyExposure = 0.1f;
+                        skyTint = new Color(0.08f, 0.08f, 0.18f); // Azul noturno
+                        break;
+                }
+                ceuMaterial.SetFloat("_Exposure", skyExposure);
+                ceuMaterial.SetColor("_SkyTint", skyTint);
+            }
+            else
+            {
+                ceuMaterial.SetColor("_SkyTint", lightColor);
+                float baseIntensityDay = lightIntensityOverTime.Evaluate(timeNormalized);
+                ceuMaterial.SetFloat("_Exposure", Mathf.Clamp(baseIntensityDay, 0.5f, 1.5f));
+            }
+        }
+    }
+
+    void ControleNeblina()
+    {
+        SeasonManager.FaseDaLua fase = SeasonManager.instance.faseDaLuaAtual;
+        if (isNight)
+        {
+            RenderSettings.fogColor = Color.black;
+            switch (fase)
+            {
+                case SeasonManager.FaseDaLua.Nova:
+                    RenderSettings.fogDensity = 0.06f; // Mais densa
+                    break;
+                case SeasonManager.FaseDaLua.Crescente:
+                case SeasonManager.FaseDaLua.Minguante:
+                    RenderSettings.fogDensity = 0.04f; // Média
+                    break;
+                case SeasonManager.FaseDaLua.Cheia:
+                default:
+                    RenderSettings.fogDensity = 0.025f; // Menos densa
+                    break;
+            }
+        }
+        else
+        {
+            RenderSettings.fogColor = new Color(0.5f, 0.5f, 0.5f);
+            RenderSettings.fogDensity = 0.01f;
+        }
+    }
+
+    void MovimentoDaLua(Quaternion lightRotation)
+    {
+        if (moonTransform != null && cameraTransform != null)
+        {
+            moonTransform.position = cameraTransform.position + (lightRotation * Vector3.forward * skyDistance);
+            moonTransform.LookAt(cameraTransform.position);
+        }
+    }
+
+    #endregion
 
     void UpdateUI()
     {
@@ -98,7 +218,7 @@ public class WorldTimeManager : MonoBehaviour
         {
             // Pega a temperatura atual, que está sempre em Celsius no ClimaManager
             float celsius = ClimaManager.instance.temperaturaAtual;
-            
+
             // Verifica a configuração salva no SettingsManager
             if (SettingsManager.instance.currentTempUnit == SettingsManager.TempUnit.Celsius)
             {
@@ -115,18 +235,31 @@ public class WorldTimeManager : MonoBehaviour
 
     void UpdateNight()
     {
+        bool noiteAtual;
+
         if (horaAtual >= 18f || horaAtual <= 6f)
         {
-            isNight = true;
+            noiteAtual = true;
         }
         else
         {
-            isNight = false;
+            noiteAtual = false;
+        }
+
+        if (noiteAtual != isNight)
+        {
+            isNight = noiteAtual;
+            AudioManager.instance.AtualizarSomAmbienteDetalhes();
         }
     }
 
     public float GetHoraAtual()
     {
         return horaAtual;
+    }
+
+    public float GetSegundosReaisPorDia()
+    {
+        return duracaoDoDiaEmMinutos * 60f;
     }
 }

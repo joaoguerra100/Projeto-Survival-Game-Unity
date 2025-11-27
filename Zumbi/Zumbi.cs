@@ -7,12 +7,13 @@ public class Zumbi : MonoBehaviour
     #region Variaveis
     [Header("Scripts")]
     private ControladorAudioZumbi zumbiSom;
+    private ZombieHealth healthScript;
 
     [Header("Referencias")]
     private Animator anim;
     private NavMeshAgent navMesh;
     private AudioSource[] sons;
-    [SerializeField]private Transform player;
+    private Transform player;
 
     [Header("Randomizaçao")]
     private int randomicoPatrulha;
@@ -20,16 +21,12 @@ public class Zumbi : MonoBehaviour
     private int randomicoTapa;
     private int randomicoAlerta;
 
-    [Header("Vida")]
-    [SerializeField] private int vida;
-
     [Header("Boleanas De IA")]
     public bool acertou;
     public bool alerta;
     public bool avistou;
     public bool patrulha;
     public bool procurarSom;
-    public bool morte;
     public bool travarUpdate;
 
     [Header("Raios De Visao")]
@@ -46,7 +43,7 @@ public class Zumbi : MonoBehaviour
     [Header("Ataques")]
     [SerializeField] private Transform pontoDeMordida; // ponto onde o zumbi deve estar para iniciar a animação
     [HideInInspector] public int danos;
-    [HideInInspector]public bool isAttacking;
+    [HideInInspector] public bool isAttacking;
     private bool deveResetarStopDistance = true;
 
     [Header("PerseguirSom")]
@@ -63,15 +60,26 @@ public class Zumbi : MonoBehaviour
         anim = GetComponent<Animator>();
         navMesh = GetComponent<NavMeshAgent>();
         zumbiSom = GetComponent<ControladorAudioZumbi>();
+        healthScript = GetComponent<ZombieHealth>();
+
         foreach (var hitbox in GetComponentsInChildren<BodyPartHitbox>())
         {
             hitbox.zumbi = this;
+            hitbox.healthScript = this.healthScript;
         }
     }
-    void Start()
+
+    void OnEnable()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        // Reseta as booleanas da IA para o estado "vivo" padrão
         patrulha = true;
+        alerta = false;
+        acertou = false;
+        avistou = false;
+        procurarSom = false;
+        travarUpdate = false;
+        isAttacking = false;
 
         anim.SetFloat("IdleIndex", Random.Range(0, 3));
         anim.SetFloat("AndarIndex", Random.Range(0, 4));
@@ -79,9 +87,7 @@ public class Zumbi : MonoBehaviour
 
     void Update()
     {
-        
-        MetodoMorte();
-        if (morte == true) { return; }
+        if (healthScript.estaMorto) { return; }
         Animacoes();
         if (acertou == true | avistou == true) { MetodoOlhar(); }
         ControladorBatalha();
@@ -96,32 +102,15 @@ public class Zumbi : MonoBehaviour
 
     #region Hit
 
-    public void Danos(int quant)
+    public void ReagirAoHit()
     {
         StopCoroutine(IeAtacarTapa());
         StopCoroutine(IEAtacarMordida());
-        acertou = true;
-        if (vida >= 1)
+        acertou = true; // Faz o zumbi te ver
+
+        if (navMesh.enabled && navMesh.isOnNavMesh)
         {
             StartCoroutine(PararAndar());
-            vida -= quant;
-        }
-    }
-
-    void MetodoMorte()
-    {
-        if (vida <= 0 && morte == false)
-        {
-            alerta = false;
-            acertou = false;
-            avistou = false;
-            patrulha = false;
-            travarUpdate = true;
-            morte = true;
-            anim.SetTrigger("Morreu");
-            gameObject.GetComponent<NavMeshAgent>().isStopped = true;
-            StopAllCoroutines();
-            Destroy(gameObject, 5);
         }
     }
 

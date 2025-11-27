@@ -22,6 +22,14 @@ public class AudioPassosZumbi : MonoBehaviour
 
     public List<AudioClip> listaAtual;
 
+    void Start()
+    {
+        if (concretoPassos.Count > 0)
+        {
+            listaAtual = concretoPassos;
+        }
+    }
+
     public void Passos()
     {
         clipes = listaAtual[Random.Range(0, listaAtual.Count)];

@@ -16,7 +16,8 @@ MonoBehaviour:
   Equipado: 0
   tipoDeMunicao: 0
   tipoDeItem: 1
-  icon: {fileID: -1389077668, guid: a029a452e55294843b022d8ab2626d7d, type: 3}
+  iconHorizontal: {fileID: 0}
+  iconVertical: {fileID: 0}
   isDroppable: 1
   removeWhenNumberIsZero: 1
   isOnlyItem: 0
@@ -27,4 +28,6 @@ MonoBehaviour:
   weigthPerItem: 0.3
   totalWeigthPerItem: 0
   itemSize: {x: 1, y: 1}
-  actionUseList: []
+  dropChance: 0
+  actionUseList:
+  - {fileID: 11400000, guid: 7ae83a6d4d7694046a36742db1316b76, type: 2}

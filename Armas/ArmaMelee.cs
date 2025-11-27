@@ -106,22 +106,22 @@ public class ArmaMelee : MonoBehaviour
 
         foreach (Collider enemycollider in hitEnemies)
         {
-            Zumbi zumbi = enemycollider.GetComponentInParent<Zumbi>();
-            if (zumbi != null && !zumbisAtingidos.Contains(zumbi))
+            BodyPartHitbox hitbox = enemycollider.GetComponent<BodyPartHitbox>();
+            if (hitbox != null && !zumbisAtingidos.Contains(hitbox.zumbi))
             {
-                zumbisAtingidos.Add(zumbi);
+                // Adiciona a IA na lista, para não bater duas vezes
+                zumbisAtingidos.Add(hitbox.zumbi);
 
+                // Calcula o dano (exatamente como você fez)
+                int danoParaAplicar = (int)weaponData.danoArma;
                 AnimatorStateInfo stateInfo = PlayerBracos.instance.anim.GetCurrentAnimatorStateInfo(0);
-
                 if (stateInfo.IsName("AtaqueForte"))
                 {
-                    var danoArma = weaponData.danoArma * 1.5f;
-                    zumbi.Danos((int)danoArma);
+                    danoParaAplicar = (int)(weaponData.danoArma * 1.5f);
                 }
-                else
-                {
-                    zumbi.Danos((int)weaponData.danoArma);
-                }
+
+                hitbox.healthScript.ReceberDano(danoParaAplicar);
+                hitbox.zumbi.ReceberHit(hitbox.parteDoCorpo);
             }
         }
     }

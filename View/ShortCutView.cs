@@ -25,26 +25,28 @@ public class ShortCutView : MonoBehaviour
 
     public void IniciateShortCutSlots(int maxShortSlot, int startIndex)
     {
+        if (specialSlotDictionary == null)
+        {
+            specialSlotDictionary = new Dictionary<int, GameObject>();
+        }
+
         for (int column = 0; column < maxShortSlot; column++)
         {
             GameObject resultGo = Instantiate(specialSlotGo);
-            SimpleSlotView[] resultSimpleSlotViewList = resultGo.GetComponentsInChildren<SimpleSlotView>();
 
-            if (!(resultSimpleSlotViewList[0].Equals(null)))
+            SimpleSlotView[] resultSimpleSlotViewList = resultGo.GetComponentsInChildren<SimpleSlotView>();
+            if (resultSimpleSlotViewList.Length > 0 && resultSimpleSlotViewList[0] != null)
             {
-                resultSimpleSlotViewList[0].coodinate = new Vector2(0, startIndex + column);
+                int currentSlotID = startIndex + column;
+                resultSimpleSlotViewList[0].coodinate = new Vector2(0, currentSlotID);
+
+                if (!specialSlotDictionary.ContainsKey(currentSlotID))
+                {
+                    specialSlotDictionary.Add(currentSlotID, resultGo);
+                }
             }
             resultGo.transform.SetParent(slotSpecialGroup.gameObject.transform);
-        }
-
-        specialSlotDictionary = new Dictionary<int, GameObject>();
-        GameObject[] resultList = GameObject.FindGameObjectsWithTag("SpecialSlot");
-        int index = 0;
-
-        foreach (var specialSlotGo in resultList)
-        {
-            specialSlotDictionary.Add(index, specialSlotGo);
-            index++;
+            resultGo.transform.localScale = Vector3.one;
         }
     }
 

@@ -7,6 +7,7 @@ public class BodyPartHitbox : MonoBehaviour
 
     public ParteDoCorpo parteDoCorpo;
     public Zumbi zumbi;
+    public ZombieHealth healthScript;
 
     void Start()
     {

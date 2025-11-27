@@ -122,23 +122,23 @@ public class InventoryManagerController : MonoBehaviour
 
     private void HandleShortcut1()
     {
-        UseShortCutToEquipItem(1, 5);
+        UseShortCutToEquipItem(0, 5);
     }
     private void HandleShortcut2()
     {
-        UseShortCutToEquipItem(2, 5);
+        UseShortCutToEquipItem(1, 5);
     }
     private void HandleShortcut3()
     {
-        UseShortCutToEquipItem(3, 5);
+        UseShortCutToEquipItem(2, 5);
     }
     private void HandleShortcut4()
     {
-        UseShortCutToEquipItem(4, 5);
+        UseShortCutToEquipItem(3, 5);
     }
     private void HandleShortcut5()
     {
-        UseShortCutToEquipItem(5, 5);
+        UseShortCutToEquipItem(4, 5);
     }
 
     #endregion
@@ -932,77 +932,81 @@ public class InventoryManagerController : MonoBehaviour
         }
     }*/
 
-    void UseShortCutToEquipItem(int shortcutIndex, int equipSlotIndex)
+    // Mudei para PUBLIC para você poder chamar esse método pelo botão da UI na Unity se necessário
+    public void UseShortCutToEquipItem(int shortcutIndex, int equipSlotIndex)
     {
         if (InventoryView.instance.VisiblePanel) return;
 
-        // Procurar o item de atalho
-        InventoryItem resultItem = TodasAsBagScriptable()
-            .Select(bag => bag.GetItemByIndexPosition(shortcutIndex))
-            .FirstOrDefault(item => item != null);
+        InventoryItem resultItem = null;
+        GenericBagScriptable origemBag = null;
 
+        foreach (var bag in TodasAsBagScriptable())
+        {
+            // Verifica se essa bag tem o item registrado no atalho solicitado
+            if (bag.ItemShortCutDictionary != null && bag.ItemShortCutDictionary.ContainsKey(shortcutIndex))
+            {
+                resultItem = bag.ItemShortCutDictionary[shortcutIndex];
+                origemBag = bag;
+                break;
+            }
+        }
+
+        // Se não achou nada no atalho, sai
         if (resultItem == null)
         {
-            Debug.LogWarning($"[SHORTCUT] Nenhum item encontrado no slot de atalho {shortcutIndex}");
+            Debug.LogWarning($"[SHORTCUT] Nenhum item encontrado mapeado no atalho {shortcutIndex}");
             return;
         }
 
-        // Descobrir a bag de origem
-        GenericBagScriptable origemBag = resultItem.bagOwner;
-        if (origemBag == null)
-        {
-            Debug.LogWarning("[SHORTCUT] Item não está associado a nenhuma bag.");
-            return;
-        }
-
-        // Obter a instância única da arma
+        // Busca a referência da arma
         FireWeaponInstance fireWeapon = origemBag.FindWeaponInstanceByStringID(resultItem.instanceID);
+        
         if (fireWeapon == null)
         {
-            Debug.LogWarning("[SHORTCUT] Instância da arma não encontrada.");
+            Debug.LogWarning("[SHORTCUT] O item no atalho não é uma arma válida ou instância não encontrada.");
             return;
         }
 
         Player.instance.trocaAnimator = true;
 
-        // Verificar o item atualmente equipado no slot
         InventoryItem equippedItem = currentClothingWeapon.GetItemByIndex(equipSlotIndex);
 
-        // Verificar se o item clicado já está equipado neste slot
+        // LÓGICA DE TOGGLE (EQUIPAR / DESEQUIPAR)
+        
+        // Se o item clicado já é exatamente o que está na mão: Desequipa
         bool isAlreadyEquippedInSlot = equippedItem != null && equippedItem.instanceID == resultItem.instanceID;
 
         if (isAlreadyEquippedInSlot)
         {
-            // Desequipar
+            // DESEQUIPAR 
             DesequiparTodasAsArmas();
+            
             fireWeapon.weaponData.ActionEquipAndUnequipListDispatch();
-            currentClothingWeapon.RemoveItemById(resultItem.instanceID);
             PlayerBracos.instance.anim.SetTrigger("Desequipar");
-            //Debug.Log($"[DESEQUIPAR] Desequipou: {resultItem.baseItemData.Label}");
+            
+            currentClothingWeapon.RemoveItemById(resultItem.instanceID);
         }
         else
         {
-            // Equipar (removendo arma anterior se existir)
+            // Equipar
             if (equippedItem != null)
             {
-                //Debug.Log($"[EQUIPAR] Substituindo item do slot {equipSlotIndex} - {equippedItem.instanceID}");
-                DesequiparTodasAsArmas();
-                equippedItem.baseItemData.ActionEquipAndUnequipListDispatch();
+                InventoryItem itemAntigo = equippedItem;
+                FireWeaponInstance armaAntiga = origemBag.FindWeaponInstanceByStringID(itemAntigo.instanceID);
+                if(armaAntiga != null) armaAntiga.weaponData.ActionEquipAndUnequipListDispatch();
+                
                 currentClothingWeapon.RemoveItemById(equippedItem.instanceID);
             }
-
-            DesequiparTodasAsArmas(); // garante que só uma arma esteja equipada
+            DesequiparTodasAsArmas(); 
             fireWeapon.equipado = true;
             equipedWeapon = fireWeapon;
-            fireWeapon.weaponData.ActionEquipAndUnequipListDispatch();
             currentClothingWeapon.AddItem(equipSlotIndex, resultItem);
-
-            //Debug.Log($"[EQUIPAR] Equipou: {resultItem.baseItemData.Label} no slot {equipSlotIndex}");
+            fireWeapon.weaponData.ActionEquipAndUnequipListDispatch();
         }
 
         StartCoroutine(RefreshInventoryView());
+        StartCoroutine(RefreshClothingWeaponView());
     }
-
 
     private void RefreshShortCutViewByItem(InventoryItem itemUpdate)
     {

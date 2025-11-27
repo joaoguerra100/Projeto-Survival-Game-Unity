@@ -6,7 +6,6 @@ public class ComplexSlotView : MonoBehaviour
 {
 
     #region Declaration
-
     [SerializeField]private InventoryItem itemView;
     [SerializeField] public Image icon;
     [SerializeField]public TextMeshProUGUI currentNumberText;
@@ -29,8 +28,6 @@ public class ComplexSlotView : MonoBehaviour
         this.inventoryIndex = index;
     }
 
-    //public GenericItemScriptable ItemInventoryView => ItemData?.baseItemData;
-
     #endregion
 
     #region  Getting Setting
@@ -41,6 +38,11 @@ public class ComplexSlotView : MonoBehaviour
     void Awake()
     {
         canvasGroup = this.gameObject.GetComponent<CanvasGroup>();
+
+        if (canvasGroup == null)
+        {
+            canvasGroup = this.gameObject.AddComponent<CanvasGroup>();
+        }
     }
 
     public void UpdateText()
@@ -56,6 +58,8 @@ public class ComplexSlotView : MonoBehaviour
 
     private void EnableAndDisableIcon(int value)
     {
+        if (canvasGroup == null) return;
+        
         if(value > 0)
         {
             canvasGroup.alpha = 1;
@@ -65,7 +69,4 @@ public class ComplexSlotView : MonoBehaviour
             canvasGroup.alpha = 0.3f;
         }
     }
-
-
-    
 }

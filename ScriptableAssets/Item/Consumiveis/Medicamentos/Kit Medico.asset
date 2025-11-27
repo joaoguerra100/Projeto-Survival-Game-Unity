@@ -10,21 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5928a2c88cb5ac4d8070e0993447a63, type: 3}
-  m_Name: Garrafa De Agua Rosa
+  m_Name: Kit Medico
   m_EditorClassIdentifier: 
-  id: 8
+  id: 61
   Equipado: 0
   tipoDeMunicao: 0
-  tipoDeItem: 0
-  icon: {fileID: 21300012, guid: 37607ec1aab56e349af84a980f685a4b, type: 3}
+  tipoDeItem: 1
+  iconHorizontal: {fileID: -112646603, guid: 490b991f6815e324f80921f301c037be, type: 3}
+  iconVertical: {fileID: 0}
   isDroppable: 1
   removeWhenNumberIsZero: 1
   isOnlyItem: 0
-  label: Garrafa De Agua Azul
-  description: Garrafa de agua para saciar a sede
+  label: Kit Medico
+  description: Cura machucados
   currentNumber: 0
-  limitedNumber: 999
+  limitedNumber: 1
   weigthPerItem: 0.5
   totalWeigthPerItem: 0
-  itemSize: {x: 1, y: 1}
-  actionUseList: []
+  itemSize: {x: 2, y: 2}
+  dropChance: 50
+  actionUseList:
+  - {fileID: 11400000, guid: c4380c9d454638b4d801bfe253112979, type: 2}

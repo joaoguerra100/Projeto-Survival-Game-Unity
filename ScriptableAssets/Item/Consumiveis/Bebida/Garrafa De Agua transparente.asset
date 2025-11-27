@@ -16,15 +16,17 @@ MonoBehaviour:
   Equipado: 0
   tipoDeMunicao: 0
   tipoDeItem: 0
-  icon: {fileID: 1999159903, guid: 6f54358315338de4682df38d2ffff039, type: 3}
+  iconHorizontal: {fileID: 0}
+  iconVertical: {fileID: 0}
   isDroppable: 1
   removeWhenNumberIsZero: 1
   isOnlyItem: 0
-  label: Garrafa De Agua transparente
+  label: Garrafa De Agua
   description: Garrafa de agua para saciar a sede
   currentNumber: 0
   limitedNumber: 999
   weigthPerItem: 0.5
   totalWeigthPerItem: 0
   itemSize: {x: 1, y: 1}
+  dropChance: 0
   actionUseList: []
